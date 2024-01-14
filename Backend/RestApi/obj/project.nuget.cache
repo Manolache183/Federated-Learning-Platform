@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "iBJ09C0A5FOgBkwwcWS0q3VwXm1Wxc3GTaAiLu0QohxeDpXS3IIURICNq9Baf1l+iDmpj3BkMds1Bm1h96i6Kg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\RestApi.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\marius.manolache01\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.19.5\\microsoft.visualstudio.azure.containers.tools.targets.1.19.5.nupkg.sha512"
+  ],
+  "logs": []
+}

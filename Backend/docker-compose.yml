@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  restapi:
+    image: ${DOCKER_REGISTRY-}restapi
+    build:
+      context: .
+      dockerfile: RestApi/Dockerfile
+    restart: always
+    ports:
+        - "8080:8080"
+        - "8081:8081"
+  
+  worker:
+    image: ${DOCKER_REGISTRY-}worker
+    build:
+      context: ./Worker/
+      dockerfile: Dockerfile
+    restart: always
+    # ports:
+    #     - "5000:5000"
+
+
+
