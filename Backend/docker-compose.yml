@@ -10,15 +10,66 @@ services:
     ports:
         - "8080:8080"
         - "8081:8081"
-  
-  worker:
-    image: ${DOCKER_REGISTRY-}worker
+    environment:
+        - "NUM_CLIENTS=5"
+
+  aggregator:
+    image: ${DOCKER_REGISTRY-}aggregator
     build:
-      context: ./Worker/
+        context: ./Aggregator/
+        dockerfile: Dockerfile
+    restart: always
+    environment:
+        - "NUM_CLIENTS=5"
+  
+  client-0:
+    image: ${DOCKER_REGISTRY-}client-0
+    build:
+      context: ./Client/
       dockerfile: Dockerfile
     restart: always
-    # ports:
-    #     - "5000:5000"
+    environment:
+        - "CLIENT_ID=0"
+        - "NUM_CLIENTS=5"
+  
+  client-1:
+    image: ${DOCKER_REGISTRY-}client-1
+    build:
+      context: ./Client/
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+        - "CLIENT_ID=1"
+        - "NUM_CLIENTS=5"
 
+  client-2:
+    image: ${DOCKER_REGISTRY-}client-2
+    build:
+      context: ./Client/
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+        - "CLIENT_ID=2"
+        - "NUM_CLIENTS=5"
+    
+  client-3:
+    image: ${DOCKER_REGISTRY-}client-3
+    build:
+        context: ./Client/
+        dockerfile: Dockerfile
+    restart: always
+    environment:
+        - "CLIENT_ID=3"
+        - "NUM_CLIENTS=5"
+
+  client-4:
+    image: ${DOCKER_REGISTRY-}client-4
+    build:
+      context: ./Client/
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+        - "CLIENT_ID=4"
+        - "NUM_CLIENTS=5"
 
 

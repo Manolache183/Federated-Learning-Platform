@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\RestApi.csproj": {}
+    "C:\\Users\\marius.manolache01\\Desktop\\Federated-Learning-Platform\\Backend\\RestApi\\RestApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\RestApi.csproj": {
+    "C:\\Users\\marius.manolache01\\Desktop\\Federated-Learning-Platform\\Backend\\RestApi\\RestApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\RestApi.csproj",
+        "projectUniqueName": "C:\\Users\\marius.manolache01\\Desktop\\Federated-Learning-Platform\\Backend\\RestApi\\RestApi.csproj",
         "projectName": "RestApi",
-        "projectPath": "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\RestApi.csproj",
+        "projectPath": "C:\\Users\\marius.manolache01\\Desktop\\Federated-Learning-Platform\\Backend\\RestApi\\RestApi.csproj",
         "packagesPath": "C:\\Users\\marius.manolache01\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\obj\\",
+        "outputPath": "C:\\Users\\marius.manolache01\\Desktop\\Federated-Learning-Platform\\Backend\\RestApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\marius.manolache01\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iBJ09C0A5FOgBkwwcWS0q3VwXm1Wxc3GTaAiLu0QohxeDpXS3IIURICNq9Baf1l+iDmpj3BkMds1Bm1h96i6Kg==",
+  "dgSpecHash": "qGtcozYB6k7YuIa2eQ7dQFSE3dQ9h8066L97g4ikkup9LsS5mioKASTzhbuLoNu5ZkcD+UONeY93tHBYaiRYOQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\marius.manolache01\\Desktop\\Licenta\\Backend\\RestApi\\RestApi.csproj",
+  "projectFilePath": "C:\\Users\\marius.manolache01\\Desktop\\Federated-Learning-Platform\\Backend\\RestApi\\RestApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\marius.manolache01\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.19.5\\microsoft.visualstudio.azure.containers.tools.targets.1.19.5.nupkg.sha512"
   ],
