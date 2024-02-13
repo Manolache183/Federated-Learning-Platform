@@ -13,63 +13,63 @@ services:
     environment:
         - "NUM_CLIENTS=5"
 
-  aggregator:
-    image: ${DOCKER_REGISTRY-}aggregator
-    build:
-        context: ./Aggregator/
-        dockerfile: Dockerfile
-    restart: always
-    environment:
-        - "NUM_CLIENTS=5"
+  # aggregator:
+  #   image: ${DOCKER_REGISTRY-}aggregator
+  #   build:
+  #       context: ./Aggregator/
+  #       dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #       - "NUM_CLIENTS=5"
   
-  client-0:
-    image: ${DOCKER_REGISTRY-}client-0
-    build:
-      context: ./Client/
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-        - "CLIENT_ID=0"
-        - "NUM_CLIENTS=5"
+  # client-0:
+  #   image: ${DOCKER_REGISTRY-}client-0
+  #   build:
+  #     context: ./Client/
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #       - "CLIENT_ID=0"
+  #       - "NUM_CLIENTS=5"
   
-  client-1:
-    image: ${DOCKER_REGISTRY-}client-1
-    build:
-      context: ./Client/
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-        - "CLIENT_ID=1"
-        - "NUM_CLIENTS=5"
+  # client-1:
+  #   image: ${DOCKER_REGISTRY-}client-1
+  #   build:
+  #     context: ./Client/
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #       - "CLIENT_ID=1"
+  #       - "NUM_CLIENTS=5"
 
-  client-2:
-    image: ${DOCKER_REGISTRY-}client-2
-    build:
-      context: ./Client/
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-        - "CLIENT_ID=2"
-        - "NUM_CLIENTS=5"
+  # client-2:
+  #   image: ${DOCKER_REGISTRY-}client-2
+  #   build:
+  #     context: ./Client/
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #       - "CLIENT_ID=2"
+  #       - "NUM_CLIENTS=5"
     
-  client-3:
-    image: ${DOCKER_REGISTRY-}client-3
-    build:
-        context: ./Client/
-        dockerfile: Dockerfile
-    restart: always
-    environment:
-        - "CLIENT_ID=3"
-        - "NUM_CLIENTS=5"
+  # client-3:
+  #   image: ${DOCKER_REGISTRY-}client-3
+  #   build:
+  #       context: ./Client/
+  #       dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #       - "CLIENT_ID=3"
+  #       - "NUM_CLIENTS=5"
 
-  client-4:
-    image: ${DOCKER_REGISTRY-}client-4
-    build:
-      context: ./Client/
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-        - "CLIENT_ID=4"
-        - "NUM_CLIENTS=5"
+  # client-4:
+  #   image: ${DOCKER_REGISTRY-}client-4
+  #   build:
+  #     context: ./Client/
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #       - "CLIENT_ID=4"
+  #       - "NUM_CLIENTS=5"
 
 

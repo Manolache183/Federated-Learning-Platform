@@ -22,7 +22,6 @@ async def sendModelToAggregatorAsync():
     
     url = "http://aggregator:5000/upload_model";
     
-    
     with open(filename, "rb") as file:
         files = {'file': (filename, file)}
         data = {"client_id": int(clientID)}

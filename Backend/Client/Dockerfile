@@ -7,6 +7,7 @@ WORKDIR /app
 # Install dependencies
 RUN pip3 install --upgrade pip
 RUN pip3 install fastapi uvicorn requests
+RUN pip3 install signalr-client
 
 # Copy the local code into the container at /app
 COPY ./* /app/
