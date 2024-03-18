@@ -6,7 +6,7 @@ object HubClient {
 
     private const val receiveNotificationTag = "ReceiveNotification" // if more stack up, replace them with enum class
 
-    init {
+    init { // maybe remove init
         hubConnection.start().blockingAwait()
 
         hubConnection.on(
