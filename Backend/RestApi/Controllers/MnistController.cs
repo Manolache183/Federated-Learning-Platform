@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using RestApi.HttpClients;
 using System.Net;
-using RestApi.Hubs;
 
 namespace RestApi.Controllers
 {
@@ -10,22 +8,20 @@ namespace RestApi.Controllers
     [Route("[controller]")]
     public class MnistController : ControllerBase // eventually turn this into a partial class?
     {
-        private readonly ILogger<MnistController> _logger;
         private readonly IAggregatorService _aggregatorService;
-        private readonly IHubContext<ClientHub, IClientHub> _hubContext;
+        private readonly ILoggerService _loggerService;
 
-        public MnistController(ILogger<MnistController> logger, IAggregatorService aggregatorService, IHubContext<ClientHub, IClientHub> hubContext)
+        public MnistController(ILoggerService loggerService, IAggregatorService aggregatorService)
         {
-            _logger = logger;
+            _loggerService = loggerService;
             _aggregatorService = aggregatorService;
-            _hubContext = hubContext;
         }
 
         [HttpGet("pull_mnist_model")]
         public async Task<IActionResult> PullLearningModelAsync()
         {
             // eventually will need to check that the user is in the mnist group
-
+            // logs everywhere
             var response = await _aggregatorService.PullLearningModelAsync();
             if (response.IsSuccessStatusCode) // add more response codes
             {
@@ -59,23 +55,25 @@ namespace RestApi.Controllers
             return BadRequest();
         }
 
-        [HttpPost("upload_mnist_aggregated_model")]
-        public async Task<IActionResult> ReceiveMnistMode() // [FromForm] IFormFile file
+        [HttpPost("log")]
+        public async Task<IActionResult> Log()
         {
-            await _hubContext.Clients.Group("mnist").ReceiveNotification("New model aggregated");
-            return Ok();
-            //using (var memoryStream = new MemoryStream())
-            //{
-            //    await file.CopyToAsync(memoryStream);
-            //    return Ok();
-            //}
+            Console.WriteLine("Logging");
+            var r = await _loggerService.LogAsync();
+            Console.WriteLine(r);
+            
+            if (r.IsSuccessStatusCode)
+            {
+                return Ok();
+            }
+
+            return BadRequest();
         }
 
-        [HttpGet("test_kotlin")]
-        public async Task<IActionResult> TestKotlin()
+        [HttpGet("ping")]
+        public async Task<IActionResult> Ping()
         {
-            Console.WriteLine("Test Kotlin");
-            return Ok();
+            return await Task.Run(Ok);
         }
     }
 }
