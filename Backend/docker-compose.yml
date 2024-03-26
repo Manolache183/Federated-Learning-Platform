@@ -12,6 +12,13 @@ services:
         - "8081:8081"
     environment:
         - "NUM_CLIENTS=5"
+  
+  logger:
+    image: ${DOCKER_REGISTRY-}logger
+    build:
+      context: .
+      dockerfile: Logger/Dockerfile
+    restart: always
 
   # aggregator:
   #   image: ${DOCKER_REGISTRY-}aggregator

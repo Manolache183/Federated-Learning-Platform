@@ -1,5 +1,0 @@
-C:\Users\marius.manolache01\Desktop\Licenta\Backend\bin\Release\RestApi.dll
-C:\Users\marius.manolache01\Desktop\Licenta\Backend\bin\Release\Worker.exe
-C:\Users\marius.manolache01\Desktop\Licenta\Backend\bin\Release\RestApi.pdb
-C:\Users\marius.manolache01\Desktop\Licenta\Backend\obj\Release\docker-compose.dcproj.AssemblyReference.cache
-C:\Users\marius.manolache01\Desktop\Licenta\Backend\obj\Release\docker-compose.dcproj.CoreCompileInputs.cache
