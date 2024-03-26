@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: logger
-        image: manouser/logger:latest
+        image: acrlicenta.azurecr.io/logger:latest
         ports:
         - containerPort: 8080
           name: logger-http
