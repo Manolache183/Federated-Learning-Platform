@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "Logger\Logger.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{345F8344-3FDB-4E89-BCBE-39AFDC0EF704}"
 	ProjectSection(SolutionItems) = preProject
+		logger-deployment.yaml = logger-deployment.yaml
 		restapi-deployment.yaml = restapi-deployment.yaml
+		services.yaml = services.yaml
 	EndProjectSection
 EndProject
 Global
