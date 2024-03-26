@@ -22,12 +22,3 @@ steps:
       az acr login -n acrlicenta
       docker push acrlicenta.azurecr.io/restapi:latest
       docker push acrlicenta.azurecr.io/logger:latest
-
-- task: KubernetesManifest@1
-  inputs:
-    action: 'deploy'
-    connectionType: 'kubernetesServiceConnection'
-    kubernetesServiceConnection: 'aksclusterlicenta-default'
-    namespace: 'default'
-    manifests: 'Backend'
-    containers: 'restapi:latest'
