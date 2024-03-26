@@ -22,6 +22,7 @@ namespace RestApi.Controllers
         {
             // eventually will need to check that the user is in the mnist group
             // logs everywhere
+            return await Task.Run(Ok); 
             var response = await _aggregatorService.PullLearningModelAsync();
             if (response.IsSuccessStatusCode) // add more response codes
             {
@@ -41,7 +42,7 @@ namespace RestApi.Controllers
         public async Task<IActionResult> SendWeightsAsync([FromForm] IFormFile file)
         {
             // check that the user is in the mnist group
-
+            return await Task.Run(Ok);
             using (var memoryStream = new MemoryStream())
             {
                 await file.CopyToAsync(memoryStream);
