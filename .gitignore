@@ -1,3 +1,9 @@
 Backend/RestApi/appsettings.json
 Backend/Logger/appsettings.json
 Backend/.vs/
+Backend/obj/
+Backend/bin/
+Backend/RestApi/obj/
+Backend/RestApi/bin/
+Backend/Logger/obj/
+Backend/Logger/bin/
