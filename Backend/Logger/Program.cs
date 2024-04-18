@@ -1,4 +1,4 @@
-using Microsoft.Azure.Cosmos;
+using Logger.CloudDatabase;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -8,9 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton(new CosmosClient(
-    configuration.GetConnectionString("CosmosEndpoint"),
-    configuration.GetConnectionString("CosmosKey")));
+builder.Services.AddSingleton<DatabaseService>();
 
 var app = builder.Build();
 
