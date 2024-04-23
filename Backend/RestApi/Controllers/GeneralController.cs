@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RestApi.CloudDatabase;
+using RestApi.Firebase;
 using RestApi.HttpClients;
 
 namespace RestApi.Controllers
@@ -9,9 +9,9 @@ namespace RestApi.Controllers
     public class GeneralController : ControllerBase
     {
         private readonly ILoggerService _loggerService;
-        private readonly DatabaseService _databaseService;
+        private readonly StorageService _databaseService;
 
-        public GeneralController(ILoggerService loggerService, DatabaseService databaseService)
+        public GeneralController(ILoggerService loggerService, StorageService databaseService)
         {
             _loggerService = loggerService;
             _databaseService = databaseService;

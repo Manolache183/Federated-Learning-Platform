@@ -26,5 +26,18 @@ namespace RestApi.HttpClients
             return await _httpClient.PostAsync("/logs/logLearningCoordonator", postData);
         }
 
+        public async Task<HttpResponseMessage> LogFileMetadata(string fileName, string filePath, Guid firebaseStorageID)
+        {
+            var fileMetadata = new FileMetadataDto(fileName, filePath, firebaseStorageID);
+            var postData = new StringContent(JsonSerializer.Serialize(fileMetadata), Encoding.UTF8, "application/json");
+            return await _httpClient.PostAsync("/logs/logFileMetadata", postData);
+        }
+
+        public async Task<HttpResponseMessage> GetFileMetadata(string fileName)
+        {
+            var postData = new StringContent(JsonSerializer.Serialize(new { fileName }), Encoding.UTF8, "application/json");
+            return await _httpClient.PostAsync("/logs/getFileMetadata", postData);
+        }
+
     }
 }

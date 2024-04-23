@@ -1,25 +1,38 @@
 ﻿using Firebase.Storage;
+using RestApi.Common;
 
-namespace RestApi.CloudDatabase
+namespace RestApi.Firebase
 {
-    public class DatabaseService
+    public class StorageService
     {
         private readonly string _path = AppDomain.CurrentDomain.BaseDirectory + @"federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json";
         private const string _bucket = "federated-learning-platf-c15c0.appspot.com";
-        private const string _folder = "models/";
+        private const string _modelsFolder = "models/";
         private readonly FirebaseStorage _db;
         private readonly HttpClient _httpClient;
-        public DatabaseService()
+
+        public StorageService()
         {
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", _path);
             _db = new FirebaseStorage(_bucket);
             _httpClient = new HttpClient();
         }
 
-        public async Task<string> UploadModel(string modelPath)
+        public async Task<bool> UploadModel(string modelPath, AlgorithmNames algorithmName, string fileName)
         {
-            var model = await _db.Child(_folder).Child("test_upload_file.txt").PutAsync(File.OpenRead(modelPath));
-            return model;
+            string modelCloudPath;
+            try
+            {
+                modelCloudPath = await _db.Child(_modelsFolder).Child(algorithmName.ToString()).Child(fileName).PutAsync(File.OpenRead(modelPath));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+
+            Console.WriteLine("Model uploaded successfully to path: " + modelCloudPath);
+            return true;
         }
 
         public async Task PrintFileContents(string fileName)

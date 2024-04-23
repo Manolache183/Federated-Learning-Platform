@@ -8,5 +8,5 @@
         public Dictionary<string, object> Claims { get; set; } = new Dictionary<string, object>();
     }
 
-    // ce dracului nu merge ala
+    public record FileMetadataDto(string FileName, string FilePath, Guid FirestoreID);
 }

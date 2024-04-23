@@ -14,6 +14,8 @@ namespace RestApi.MessageBroker
         private const string _userName = "guest";
         private const string _password = "guest";
 
+        public bool aggregationInProgress = false;
+
         private enum Queues
         {
             work_queue,
@@ -81,6 +83,7 @@ namespace RestApi.MessageBroker
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 Console.WriteLine($" [x] Received {message}");
+                aggregationInProgress = false; // numele fisieruluuuui
             };
             _channel.BasicConsume(queue: Queues.results_queue.ToString(), autoAck: true, consumer: consumer);
         }

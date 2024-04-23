@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using RestApi.CloudDatabase;
+using RestApi.Firebase;
 using RestApi.HttpClients;
 using RestApi.MessageBroker;
 
@@ -37,7 +37,7 @@ builder.Services.AddAuthentication(authOptions =>
 });
 
 builder.Services.AddSingleton<EventBus>();
-builder.Services.AddSingleton<DatabaseService>();
+builder.Services.AddSingleton<StorageService>();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient<IAggregatorService, MnistService>(httpClient =>
