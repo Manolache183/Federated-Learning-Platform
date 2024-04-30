@@ -71,15 +71,16 @@ namespace Logger.Firebase
 
             var dict = documentSnapshot.ToDictionary();
 
-            var name = dict["FileName"].ToString();
-            var firebaseStorageID = dict["FireBaseStorageID"].ToString();
+            var firebaseStorageID = dict["FirebaseStorageID"].ToString();
             var leastAccesed = dict["LeastAccesed"].ToString();
 
-            if (name == null || firebaseStorageID == null || leastAccesed == null)
+            if (firebaseStorageID == null || leastAccesed == null)
             {
                 Console.WriteLine("File metadata not found");
                 return null;
             }
+
+            Console.WriteLine("File metadata: " + fileName + " " + firebaseStorageID + " " + leastAccesed);
 
             return new FileMetadataSend(firebaseStorageID, leastAccesed);
         }
@@ -117,6 +118,42 @@ namespace Logger.Firebase
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> SwapModelFiles(string latestModelFirebaseStorageID)
+        {
+            var previousModelFileMetadata = await GetFileMetadata("previous_mnist_model");
+            if (previousModelFileMetadata == null)
+            {
+                Console.WriteLine("Previous model not found");
+                return false;
+            }
+
+            var currentModelFileMetadata = await GetFileMetadata("current_mnist_model");
+            if (currentModelFileMetadata == null)
+            {
+                Console.WriteLine("Current model not found");
+                return false;
+            }
+
+            var previousModelFileMetadataUpdate = new FileMetadata("previous_mnist_model", Guid.Parse(currentModelFileMetadata.FirebaseStorageID), DateTime.Now);
+            var currentModelFileMetadataUpdate = new FileMetadata("current_mnist_model", Guid.Parse(latestModelFirebaseStorageID), DateTime.Now);
+
+            var r = await UpdateFileMetadata(previousModelFileMetadataUpdate);
+            if (!r)
+            {
+                Console.WriteLine("Failed to update previous model metadata");
+                return false;
+            }
+
+            r = await UpdateFileMetadata(currentModelFileMetadataUpdate);
+            if (!r)
+            {
+                Console.WriteLine("Failed to update current model metadata");
                 return false;
             }
 

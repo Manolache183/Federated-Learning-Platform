@@ -1,12 +1,8 @@
 ﻿namespace RestApi.DTOS
 {
-    public record LogItemDto(string MicroserviceName);
-    //public record TokenGenerationRequest(string Email, Dictionary<string, JsonElement> Claims);
-    public class TokenGenerationRequest
-    {
-        public string? Email { get; set; }
-        public Dictionary<string, object> Claims { get; set; } = new Dictionary<string, object>();
-    }
+    public record LogItemDto(string microserviceName);
 
-    public record FileMetadataDto(string FileName, string FilePath, Guid FirestoreID);
+    public record FileMetadata(string firebaseStorageID, string leastAccesed);
+    public record FileMetadataSend(string fileName, Guid firebaseStorageID);
+    public record FileContent(string content);
 }

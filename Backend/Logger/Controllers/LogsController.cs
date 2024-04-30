@@ -34,8 +34,8 @@ namespace Logger.Controllers
             return StatusCode(500, "Failed to log item");
         }
 
-        [HttpPost("logFileMetadata")]
-        public async Task<IActionResult> LogFileMetadata([FromBody] FileMetadataReceive payload)
+        [HttpPost("addFileMetadata")]
+        public async Task<IActionResult> AddFileMetadata([FromBody] FileMetadataReceive payload)
         {
             Console.WriteLine("Received file metadata request for file: {0}", payload.FileName);
             var r = await _cloudFirestoreService.AddFileMetadata(new FileMetadata(payload.FileName, payload.FirebaseStorageID, DateTime.Now));
@@ -84,6 +84,19 @@ namespace Logger.Controllers
             }
 
             return StatusCode(500, "Failed to delete file metadata");
+        }
+
+        [HttpPut("/logs/swapModelFiles/{latestModelFirebaseStorageID}")]
+        public async Task<IActionResult> SwapModelFiles(string latestModelFirebaseStorageID)
+        {
+            Console.WriteLine("Received request to swap model files");
+            var r = await _cloudFirestoreService.SwapModelFiles(latestModelFirebaseStorageID);
+            if (r)
+            {
+                return Ok("Swapped model files");
+            }
+
+            return StatusCode(500, "Failed to swap model files");
         }
     }
 }

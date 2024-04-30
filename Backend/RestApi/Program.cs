@@ -37,12 +37,9 @@ builder.Services.AddAuthentication(authOptions =>
 });
 
 builder.Services.AddSingleton<EventBus>();
-builder.Services.AddSingleton<StorageService>();
 
 builder.Services.AddControllers();
-builder.Services.AddHttpClient<IAggregatorService, MnistService>(httpClient =>
-    httpClient.BaseAddress = new Uri(mnistClientBaseAddress)
-);
+builder.Services.AddHttpClient<StorageService>();
 builder.Services.AddHttpClient<ILoggerService, LoggerService>(httpClient =>
     httpClient.BaseAddress = new Uri(loggerBaseAddress)
 );

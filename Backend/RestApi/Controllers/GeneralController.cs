@@ -37,12 +37,5 @@ namespace RestApi.Controllers
 
             return StatusCode(500, "nu merse log-ul");
         }
-
-        [HttpGet("testDownload")]
-        public async Task<IActionResult> TestDownload()
-        {
-            await _databaseService.PrintFileContents("text_test_file.txt");
-            return Ok();
-        }
     }
 }

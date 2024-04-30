@@ -16,7 +16,7 @@ namespace RestApi.MessageBroker
 
         public bool aggregationInProgress = false;
 
-        private enum Queues
+        private enum QueueName
         {
             work_queue,
             results_queue
@@ -65,9 +65,21 @@ namespace RestApi.MessageBroker
             return false;
         }
 
+        public void PublishAgregateMessage(string message)
+        {
+            var body = Encoding.UTF8.GetBytes(message);
+
+            _channel.BasicPublish(exchange: string.Empty,
+                     routingKey: QueueName.work_queue.ToString(),
+                     basicProperties: _properties,
+                     body: body);
+
+            Console.WriteLine($" [x] Sent {message}");
+        }
+
         private void createQueues()
         {
-            var queues = Enum.GetValues(typeof(Queues));
+            var queues = Enum.GetValues(typeof(QueueName));
             foreach (var queue in queues)
             {
                 Console.WriteLine($"Creating queue: {queue}");
@@ -83,22 +95,9 @@ namespace RestApi.MessageBroker
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 Console.WriteLine($" [x] Received {message}");
-                aggregationInProgress = false; // numele fisieruluuuui
+                aggregationInProgress = false;
             };
-            _channel.BasicConsume(queue: Queues.results_queue.ToString(), autoAck: true, consumer: consumer);
-        }
-
-        public void PublishAgregateMessage()
-        {
-            var message = "Message sent from rest";
-            var body = Encoding.UTF8.GetBytes(message);
-            
-            _channel.BasicPublish(exchange: string.Empty,
-                     routingKey: Queues.work_queue.ToString(),
-                     basicProperties: _properties,
-                     body: body);
-
-            Console.WriteLine($" [x] Sent {message}");
+            _channel.BasicConsume(queue: QueueName.results_queue.ToString(), autoAck: true, consumer: consumer);
         }
     }
 }

@@ -14,11 +14,6 @@ namespace RestApi.HttpClients
             _httpClient = httpClient;
         }
 
-        public async Task<HttpResponseMessage> GetJwtAsync(TokenGenerationRequest tokenGenerationRequest)
-        {
-            var payload = JsonSerializer.Serialize(tokenGenerationRequest);
-            using var httpContent = new StringContent(payload, Encoding.UTF8, "application/json");
-            return await _httpClient.PostAsync("getJwtToken", httpContent);
-        }
+
     }
 }

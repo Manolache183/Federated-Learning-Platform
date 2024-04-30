@@ -1,6 +1,6 @@
 ﻿namespace RestApi.Common
 {
-    public enum AlgorithmNames
+    public enum AlgorithmName
     {
         Mnist
     }
