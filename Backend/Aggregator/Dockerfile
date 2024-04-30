@@ -1,18 +1,15 @@
-# Use the official Python image as the base image
 FROM tensorflow/tensorflow
 
-# Set the working directory in the container
+ENV PYTHONUNBUFFERED=1 
 WORKDIR /app
 
-# Install dependencies
-RUN pip3 install --upgrade pip
-RUN pip3 install fastapi uvicorn python-multipart requests
+#COPY requirements .
+RUN pip3 install --upgrade pip #&& pip install -r requirements
+RUN pip3 install pika
+RUN pip3 install firebase_admin
 
-# Copy the local code into the container at /app
-COPY ./* /app/
+COPY . .
 
-# Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 5672
 
-# Define the command to run your application
-CMD ["uvicorn", "routes:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]
+CMD ["python", "main.py"]

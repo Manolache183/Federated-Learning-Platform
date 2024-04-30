@@ -1,5 +1,7 @@
 fun main() {
+    println("Hello, World!")
+    Thread.sleep(5000)
     HttpClient.pingServer()
-    HubClient.toString() // junk: to run the init block it has to be referenced once
+    HttpClient.trainingCycle()
 }
 

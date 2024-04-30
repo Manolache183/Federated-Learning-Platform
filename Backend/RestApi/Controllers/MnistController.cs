@@ -1,80 +1,134 @@
 using Microsoft.AspNetCore.Mvc;
+using RestApi.Firebase;
 using RestApi.HttpClients;
+using RestApi.MessageBroker;
 using System.Net;
+using RestApi.Common;
+using System.Text;
+using RestApi.DTOS;
 
 namespace RestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class MnistController : ControllerBase // eventually turn this into a partial class?
+    public class MnistController : ControllerBase
     {
-        private readonly IAggregatorService _aggregatorService;
         private readonly ILoggerService _loggerService;
+        private readonly EventBus _eventBus;
+        private readonly StorageService _firebaseStorageService;
+        
+        private readonly int clientsThresholdToStartTraining = 3;
+        
+        private static bool startTraining = false;
+        private static int pushedClients = 0;
+        private static readonly object pushedClientsLock = new object();
 
-        public MnistController(ILoggerService loggerService, IAggregatorService aggregatorService)
+        public MnistController(ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService)
         {
             _loggerService = loggerService;
-            _aggregatorService = aggregatorService;
+            _eventBus = eventBus;
+            _firebaseStorageService = firebaseStorageService;
         }
 
-        [HttpGet("pull_mnist_model")]
-        public async Task<IActionResult> PullLearningModelAsync()
+        [HttpGet("checkIfTrainingShouldStart")]
+        public IActionResult CheckIfTrainingShouldStart()
         {
-            // eventually will need to check that the user is in the mnist group
-            // logs everywhere
-            return await Task.Run(Ok); 
-            var response = await _aggregatorService.PullLearningModelAsync();
-            if (response.IsSuccessStatusCode) // add more response codes
+            if (!startTraining || _eventBus.aggregationInProgress)
             {
-                var contentStream = await response.Content.ReadAsStreamAsync(); // should the content creation be here?
-                var contentType = response?.Content?.Headers?.ContentType?.MediaType;
-                var fileName = "learning_model";
-
-                if (contentType != null) { 
-                    return File(contentStream, contentType, fileName);
-                }
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Server is not prepared to start training!");
             }
-            
-            return BadRequest("Server couldn't retrieve the model");
+
+            return Ok("Training should start!");
         }
 
-        [HttpPost("send_mnist_weights")]
-        public async Task<IActionResult> SendWeightsAsync([FromForm] IFormFile file)
+        [HttpGet("getModelDownloadUrl")]
+        public async Task<IActionResult> GetModelDownloadUrl()
         {
-            // check that the user is in the mnist group
-            return await Task.Run(Ok);
-            using (var memoryStream = new MemoryStream())
+            if (_eventBus.aggregationInProgress)
             {
-                await file.CopyToAsync(memoryStream);
-                var response = await _aggregatorService.SendWeightsAsync(memoryStream, file.FileName);
-                if (response.StatusCode == HttpStatusCode.OK) // add more response codes
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Agregation in progress!");
+            }
+
+            var fileMetadata = await _loggerService.GetFileMetadata("current_mnist_model");
+            if (fileMetadata == null)
+            {
+                return StatusCode((int)HttpStatusCode.NotFound, "Model not found!");
+            }
+
+            var downloadUrl = await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.Mnist, fileMetadata.firebaseStorageID);
+            if (downloadUrl == null)
+            {
+                startTraining = false;
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Failed to get download url!");
+            }
+
+            return Ok(downloadUrl);
+        }
+
+        [HttpPost("pushModel")]
+        public async Task<IActionResult> PushModel([FromBody] FileContent fileContent)
+        {
+            if (_eventBus.aggregationInProgress)
+            {
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Agregation already started!");
+            }
+
+            int clientNumber;
+            lock (pushedClientsLock)
+            {
+                pushedClients++;
+                clientNumber = pushedClients;
+            }
+
+            var clientModelName = "client_mnist_model_" + pushedClients;
+
+            var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent.content));
+            var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, AlgorithmName.Mnist, clientModelName);
+            if (!r)
+            {
+                Console.WriteLine("Failed to upload model");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Failed to upload model!");
+            }
+
+            Console.WriteLine("Model pushed successfully: " + clientModelName);
+
+            if (clientNumber == clientsThresholdToStartTraining)
+            {
+                startTraining = false;
+                _eventBus.aggregationInProgress = true;
+
+                var latestModelFirebaseStorageID = Guid.NewGuid().ToString();
+
+                var previousModelFileName = "previous_mnist_model";
+                var previousModelFileMetadata = await _loggerService.GetFileMetadata(previousModelFileName);
+                if (previousModelFileMetadata != null)
                 {
-                    return Ok();
+                    await _firebaseStorageService.DeleteModel(AlgorithmName.Mnist, previousModelFileMetadata.firebaseStorageID);
+                } else
+                {
+                    Console.WriteLine("Previous model not found");
                 }
-            }
-            
-            return BadRequest();
-        }
+                
+                r = await _loggerService.SwapModelFiles(latestModelFirebaseStorageID);
+                if (!r)
+                {
+                    Console.WriteLine("Failed to swap model files");
+                }
 
-        [HttpPost("log")]
-        public async Task<IActionResult> Log()
-        {
-            Console.WriteLine("Logging");
-            var r = await _loggerService.LogAsync();
-            Console.WriteLine(r);
-            
-            if (r.IsSuccessStatusCode)
-            {
-                return Ok();
+                _eventBus.PublishAgregateMessage(latestModelFirebaseStorageID);
             }
 
-            return BadRequest();
+            return Ok("Model pushed!");
         }
 
-        [HttpGet("ping")]
-        public async Task<IActionResult> Ping()
+        [HttpPost("initializeTrainig")]
+        public IActionResult StartTraining()
         {
-            return await Task.Run(Ok);
+            _eventBus.aggregationInProgress = false;
+            pushedClients = 0;
+            startTraining = true;
+
+            return Ok("Training can be started!");
         }
     }
 }

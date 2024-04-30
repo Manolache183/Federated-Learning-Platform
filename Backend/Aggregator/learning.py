@@ -58,6 +58,4 @@ def evaluateGlobalModel(globalModel):
                   metrics=['accuracy'])    
 
     globalModel.evaluate(x_test, y_test, verbose=2)
-    
-    
 

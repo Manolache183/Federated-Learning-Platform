@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 		services.yaml = services.yaml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authenticator", "Authenticator\Authenticator.csproj", "{1F955EB8-100F-448E-8AE2-EDE6CB298978}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{4143C9CB-3CC6-482B-8F51-56CC723E3B4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4143C9CB-3CC6-482B-8F51-56CC723E3B4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4143C9CB-3CC6-482B-8F51-56CC723E3B4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F955EB8-100F-448E-8AE2-EDE6CB298978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F955EB8-100F-448E-8AE2-EDE6CB298978}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F955EB8-100F-448E-8AE2-EDE6CB298978}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F955EB8-100F-448E-8AE2-EDE6CB298978}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

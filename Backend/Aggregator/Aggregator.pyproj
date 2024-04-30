@@ -11,6 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>Aggregator</Name>
     <RootNamespace>Aggregator</RootNamespace>
+    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,12 +22,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FirebaseStorageService.py" />
     <Compile Include="learning.py" />
     <Compile Include="main.py" />
-    <Compile Include="routes.py" />
+    <Compile Include="quque_manager.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dockerfile" />
+    <Content Include="federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

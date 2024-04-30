@@ -6,77 +6,37 @@ services:
     build:
       context: .
       dockerfile: RestApi/Dockerfile
-    restart: always
     ports:
         - "8080:8080"
         - "8081:8081"
-    environment:
-        - "NUM_CLIENTS=5"
+
+  kotlin-client:
+    image: ${DOCKER_REGISTRY-}kotlin-client
+    build:
+      context: ../Kotlin-Clients/
+      dockerfile: Dockerfile
+    deploy:
+        mode: replicated
+        replicas: 3
   
   logger:
     image: ${DOCKER_REGISTRY-}logger
     build:
       context: .
       dockerfile: Logger/Dockerfile
-    restart: always
 
-  # aggregator:
-  #   image: ${DOCKER_REGISTRY-}aggregator
-  #   build:
-  #       context: ./Aggregator/
-  #       dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #       - "NUM_CLIENTS=5"
+  rabbitmq:
+    image: 'rabbitmq:3.13-alpine'
+    ports:
+      - "5672:5672"
+    deploy:
+        mode: replicated
+        replicas: 1
+    volumes:
+      - ./rabbitmq-dataB:/var/lib/rabbitmq/
   
-  # client-0:
-  #   image: ${DOCKER_REGISTRY-}client-0
-  #   build:
-  #     context: ./Client/
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #       - "CLIENT_ID=0"
-  #       - "NUM_CLIENTS=5"
-  
-  # client-1:
-  #   image: ${DOCKER_REGISTRY-}client-1
-  #   build:
-  #     context: ./Client/
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #       - "CLIENT_ID=1"
-  #       - "NUM_CLIENTS=5"
-
-  # client-2:
-  #   image: ${DOCKER_REGISTRY-}client-2
-  #   build:
-  #     context: ./Client/
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #       - "CLIENT_ID=2"
-  #       - "NUM_CLIENTS=5"
-    
-  # client-3:
-  #   image: ${DOCKER_REGISTRY-}client-3
-  #   build:
-  #       context: ./Client/
-  #       dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #       - "CLIENT_ID=3"
-  #       - "NUM_CLIENTS=5"
-
-  # client-4:
-  #   image: ${DOCKER_REGISTRY-}client-4
-  #   build:
-  #     context: ./Client/
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #       - "CLIENT_ID=4"
-  #       - "NUM_CLIENTS=5"
-
-
+  aggregator:
+    image: ${DOCKER_REGISTRY-}aggregator
+    build:
+        context: ./Aggregator/
+        dockerfile: Dockerfile
