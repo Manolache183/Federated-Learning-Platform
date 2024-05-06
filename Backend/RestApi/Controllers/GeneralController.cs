@@ -27,10 +27,9 @@ namespace RestApi.Controllers
         public async Task<IActionResult> Log()
         {
             Console.WriteLine("Logging");
-            var r = await _loggerService.LogAsync();
-            Console.WriteLine(r);
+            var r = await _loggerService.LogAsync("Sample log");
 
-            if (r.IsSuccessStatusCode)
+            if (r)
             {
                 return Ok();
             }

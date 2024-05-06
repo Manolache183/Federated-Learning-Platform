@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton<FirestoreDatabaseService>();
+builder.Services.AddScoped<FirestoreDatabaseService>();
 
 var app = builder.Build();
 

@@ -8,13 +8,13 @@ class FirebaseStorageService:
 		self.bucket = storage.bucket()
 
 	def downloadClientModels(self):
-		blobs = self.bucket.list_blobs(prefix="clientModels/Mnist/client_mnist_model_")
+		blobs = self.bucket.list_blobs(prefix="clientModels/mnist/client_mnist_model_")
 		for blob in blobs:
 			print("Blob name: " + blob.name)
 			# here should be a download happening
 			
 	def uploadModel(self, modelName):
-		modelPath = f"aggregatedModels/Mnist/{modelName}"
+		modelPath = f"aggregatedModels/mnist/{modelName}"
 		blob = self.bucket.blob(modelPath)
 		
 		content = "This is the content of the model from the Aggregator"

@@ -49,8 +49,4 @@ class QueueManager:
         time.sleep(5)
         print("Work done!")
         self.firebaseStorageService.uploadModel(modelName)
-        self.publish("Work done!")
-    
-        
-
         

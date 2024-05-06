@@ -19,17 +19,19 @@ namespace RestApi.HttpClients
             return await _httpClient.GetAsync("/logs");
         }
 
-        public async Task<HttpResponseMessage> LogAsync()
+        public async Task<bool> LogAsync(string message)
         {
-            var logItem = new LogItemDto(_microserviceName);
+            var logItem = new LogItem(_microserviceName, message);
             var postData = new StringContent(JsonSerializer.Serialize(logItem), Encoding.UTF8, "application/json");
-            return await _httpClient.PostAsync("/logs/logLearningCoordonator", postData);
+            
+            var httpResponseMessage = await _httpClient.PostAsync("/logs/logLearningCoordonator", postData);
+            return httpResponseMessage.IsSuccessStatusCode;
         }
 
         public async Task<bool> AddFileMetadata(string fileName, Guid FirebaseStorageID)
         {
             var fileMetadata = new FileMetadataSend(fileName, FirebaseStorageID);
-            var url = "/logs/addFileMetadata";
+            var url = "/FileMetadata/addFileMetadata";
             var postData = new StringContent(JsonSerializer.Serialize(fileMetadata), Encoding.UTF8, "application/json");
 
             var httpResponseMessage = await _httpClient.PostAsync(url, postData);
@@ -38,7 +40,7 @@ namespace RestApi.HttpClients
 
         public async Task<FileMetadata?> GetFileMetadata(string fileName)
         {
-            var url = $"/logs/getFileMetadata/{fileName}";
+            var url = $"/FileMetadata/getFileMetadata/{fileName}";
             
             var httpResponseMessage = await _httpClient.GetAsync(url);
             if (!httpResponseMessage.IsSuccessStatusCode)
@@ -53,7 +55,7 @@ namespace RestApi.HttpClients
         public async Task<bool> UpdateFileMetadata(string fileName, string filePath, Guid FirebaseStorageID)
         {
             var fileMetadata = new FileMetadataSend(fileName, FirebaseStorageID);
-            var url = "/logs/updateFileMetadata";
+            var url = "/FileMetadata/updateFileMetadata";
             var putData = new StringContent(JsonSerializer.Serialize(fileMetadata), Encoding.UTF8, "application/json");
             
             var httpResponseMessage = await _httpClient.PutAsync(url, putData);
@@ -62,7 +64,7 @@ namespace RestApi.HttpClients
 
         public async Task<bool> DeleteFileMetadata(string fileName)
         {
-            var url = $"/logs/deleteFileMetadata/{fileName}";
+            var url = $"/FileMetadata/deleteFileMetadata/{fileName}";
 
             var httpResponseMessage = await _httpClient.DeleteAsync(url);
             return httpResponseMessage.IsSuccessStatusCode;       
@@ -70,7 +72,7 @@ namespace RestApi.HttpClients
 
         public async Task<bool> SwapModelFiles(string latestModelFirebaseStorageID)
         {
-            var url = $"/logs/swapModelFiles/{latestModelFirebaseStorageID}";
+            var url = $"/FileMetadata/swapModelFiles/{latestModelFirebaseStorageID}";
 
             var httpResponseMessage = await _httpClient.PutAsync(url, null);
             return httpResponseMessage.IsSuccessStatusCode;

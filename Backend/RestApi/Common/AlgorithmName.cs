@@ -2,6 +2,6 @@
 {
     public enum AlgorithmName
     {
-        Mnist
+        mnist
     }
 }
