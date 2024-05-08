@@ -22,11 +22,12 @@ namespace Logger.Firebase
 
         public async Task<bool> AddLogItem(LogItem logItem)
         {
-            DocumentReference documentReference = _db.Collection(CollectionNames.Logs.ToString()).Document(logItem.Id.ToString());
+            DocumentReference documentReference = _db.Collection(CollectionNames.Logs.ToString()).Document(logItem.id.ToString());
             Dictionary<string, object> logItemDictionary = new Dictionary<string, object>
             {
-                { "MicroserviceName", logItem.MicroserviceName },
-                { "Timestamp", logItem.Timestamp.ToUniversalTime() }
+                { "microserviceName", logItem.microserviceName },
+                { "message", logItem.message },
+                { "timestamp", logItem.timestamp.ToUniversalTime() }
             };
 
             try
@@ -44,11 +45,11 @@ namespace Logger.Firebase
 
         public async Task<bool> AddFileMetadata(FileMetadata fileMetadata)
         {
-            DocumentReference documentReference = _db.Collection(CollectionNames.FilesMetadata.ToString()).Document(fileMetadata.FileName);
+            DocumentReference documentReference = _db.Collection(CollectionNames.FilesMetadata.ToString()).Document(fileMetadata.fileName);
             Dictionary<string, object> fileMetadataDictionary = new Dictionary<string, object>
             {
-                { "FirebaseStorageID", fileMetadata.FirebaseStorageID.ToString() },
-                { "LeastAccesed", fileMetadata.LeastAccesed.ToUniversalTime() }
+                { "firebaseStorageID", fileMetadata.firebaseStorageID.ToString() },
+                { "leastAccessed", fileMetadata.leastAccessed.ToUniversalTime() }
             };
 
             try
@@ -71,27 +72,27 @@ namespace Logger.Firebase
 
             var dict = documentSnapshot.ToDictionary();
 
-            var firebaseStorageID = dict["FirebaseStorageID"].ToString();
-            var leastAccesed = dict["LeastAccesed"].ToString();
+            var firebaseStorageID = dict["firebaseStorageID"].ToString();
+            var leastAccessed = dict["leastAccessed"].ToString();
 
-            if (firebaseStorageID == null || leastAccesed == null)
+            if (firebaseStorageID == null || leastAccessed == null)
             {
-                Console.WriteLine("File metadata not found");
+                Console.WriteLine("file metadata not found");
                 return null;
             }
 
-            Console.WriteLine("File metadata: " + fileName + " " + firebaseStorageID + " " + leastAccesed);
+            Console.WriteLine("File metadata: " + fileName + " " + firebaseStorageID + " " + leastAccessed);
 
-            return new FileMetadataSend(firebaseStorageID, leastAccesed);
+            return new FileMetadataSend(firebaseStorageID, leastAccessed);
         }
 
         public async Task<bool> UpdateFileMetadata(FileMetadata fileMetadata)
         {
-            DocumentReference documentReference = _db.Collection(CollectionNames.FilesMetadata.ToString()).Document(fileMetadata.FileName);
+            DocumentReference documentReference = _db.Collection(CollectionNames.FilesMetadata.ToString()).Document(fileMetadata.fileName);
             Dictionary<string, object> fileMetadataDictionary = new Dictionary<string, object>
             {
-                { "FirebaseStorageID", fileMetadata.FirebaseStorageID.ToString() },
-                { "LeastAccesed", fileMetadata.LeastAccesed.ToUniversalTime() }
+                { "firebaseStorageID", fileMetadata.firebaseStorageID.ToString() },
+                { "leastAccessed", fileMetadata.leastAccessed.ToUniversalTime() }
             };
 
             try
@@ -140,7 +141,7 @@ namespace Logger.Firebase
                 return false;
             }
 
-            var previousModelFileMetadataUpdate = new FileMetadata("previous_mnist_model", Guid.Parse(currentModelFileMetadata.FirebaseStorageID), DateTime.Now);
+            var previousModelFileMetadataUpdate = new FileMetadata("previous_mnist_model", Guid.Parse(currentModelFileMetadata.firebaseStorageID), DateTime.Now);
             var currentModelFileMetadataUpdate = new FileMetadata("current_mnist_model", Guid.Parse(latestModelFirebaseStorageID), DateTime.Now);
 
             var r = await UpdateFileMetadata(previousModelFileMetadataUpdate);

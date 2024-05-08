@@ -1,9 +1,9 @@
 ﻿namespace Logger.Firebase
 {
-    public record LogItem (Guid Id, string MicroserviceName, DateTime Timestamp);
-    public record LogItemDto (string MicroserviceName);
+    public record LogItem (Guid id, string microserviceName, string message, DateTime timestamp);
+    public record LogItemReceive (string microserviceName, string message);
 
-    public record FileMetadata(string FileName, Guid FirebaseStorageID, DateTime LeastAccesed);
-    public record FileMetadataReceive(string FileName, Guid FirebaseStorageID);
-    public record FileMetadataSend(string FirebaseStorageID, string LeastAccesed);
+    public record FileMetadata(string fileName, Guid firebaseStorageID, DateTime leastAccessed);
+    public record FileMetadataReceive(string fileName, Guid firebaseStorageID);
+    public record FileMetadataSend(string firebaseStorageID, string leastAccessed);
 }

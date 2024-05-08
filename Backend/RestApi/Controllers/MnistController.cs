@@ -31,11 +31,17 @@ namespace RestApi.Controllers
         }
 
         [HttpGet("checkIfTrainingShouldStart")]
-        public IActionResult CheckIfTrainingShouldStart()
+        public async Task<IActionResult> CheckIfTrainingShouldStart()
         {
             if (!startTraining || _eventBus.aggregationInProgress)
             {
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Server is not prepared to start training!");
+            }
+
+            var r = await _loggerService.LogAsync("Training should start!");
+            if (!r)
+            {
+                Console.WriteLine("Failed to log message");
             }
 
             return Ok("Training should start!");
@@ -55,7 +61,7 @@ namespace RestApi.Controllers
                 return StatusCode((int)HttpStatusCode.NotFound, "Model not found!");
             }
 
-            var downloadUrl = await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.Mnist, fileMetadata.firebaseStorageID);
+            var downloadUrl = await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.mnist, fileMetadata.firebaseStorageID);
             if (downloadUrl == null)
             {
                 startTraining = false;
@@ -80,10 +86,12 @@ namespace RestApi.Controllers
                 clientNumber = pushedClients;
             }
 
-            var clientModelName = "client_mnist_model_" + pushedClients;
+            const string clientModelNamePrefix = "client_mnist_model_";
+            var clientModelName = clientModelNamePrefix + pushedClients;
 
             var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent.content));
-            var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, AlgorithmName.Mnist, clientModelName);
+            
+            var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, AlgorithmName.mnist, clientModelName);
             if (!r)
             {
                 Console.WriteLine("Failed to upload model");
@@ -103,7 +111,7 @@ namespace RestApi.Controllers
                 var previousModelFileMetadata = await _loggerService.GetFileMetadata(previousModelFileName);
                 if (previousModelFileMetadata != null)
                 {
-                    await _firebaseStorageService.DeleteModel(AlgorithmName.Mnist, previousModelFileMetadata.firebaseStorageID);
+                    await _firebaseStorageService.DeleteModel(AlgorithmName.mnist, previousModelFileMetadata.firebaseStorageID);
                 } else
                 {
                     Console.WriteLine("Previous model not found");
@@ -122,11 +130,13 @@ namespace RestApi.Controllers
         }
 
         [HttpPost("initializeTrainig")]
-        public IActionResult StartTraining()
+        public async Task<IActionResult> StartTraining()
         {
             _eventBus.aggregationInProgress = false;
             pushedClients = 0;
             startTraining = true;
+
+            var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, "client_mnist_model_");
 
             return Ok("Training can be started!");
         }

@@ -4,7 +4,7 @@ namespace RestApi.HttpClients
 {
     public interface ILoggerService
     {
-        public abstract Task<HttpResponseMessage> LogAsync();
+        public abstract Task<bool> LogAsync(string message);
         public abstract Task<HttpResponseMessage> PingAsync();
         public abstract Task<bool> AddFileMetadata(string fileName, Guid FirebaseStorageID);
         public abstract Task<FileMetadata?> GetFileMetadata(string fileName);

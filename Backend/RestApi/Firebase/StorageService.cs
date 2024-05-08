@@ -59,7 +59,7 @@ namespace RestApi.Firebase
             var content = await response.Content.ReadAsStringAsync();
             return content;
         }
-
+        
         public async Task<string?> GetAggregatedModelFileUrl(AlgorithmName algorithmName, string fileName)
         {
             string? downloadUrl = null;
@@ -91,6 +91,24 @@ namespace RestApi.Firebase
             return true;
         }
 
-       
+        public async Task<bool> CleanupClientModels(AlgorithmName algorithmName, string clientModelNamePrefix)
+        {
+            for (int i = 1; ; i++)
+            {
+                var clientModelName = clientModelNamePrefix + i;
+                try
+                {
+                    await _db.Child(_clientModelsFolder).Child(algorithmName.ToString()).Child(clientModelName).DeleteAsync();
+                    Console.WriteLine("Deleted model: " + clientModelName);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(i + " client models deleted");
+                    break;
+                }
+            }
+
+            return true;
+        }
     }
 }
