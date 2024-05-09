@@ -6,6 +6,7 @@ using System.Net;
 using RestApi.Common;
 using System.Text;
 using RestApi.DTOS;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RestApi.Controllers
 {
@@ -30,6 +31,7 @@ namespace RestApi.Controllers
             _firebaseStorageService = firebaseStorageService;
         }
 
+        [Authorize(Roles = "client")]
         [HttpGet("checkIfTrainingShouldStart")]
         public async Task<IActionResult> CheckIfTrainingShouldStart()
         {
@@ -47,6 +49,7 @@ namespace RestApi.Controllers
             return Ok("Training should start!");
         }
 
+        [Authorize(Roles = "client")]
         [HttpGet("getModelDownloadUrl")]
         public async Task<IActionResult> GetModelDownloadUrl()
         {
@@ -71,6 +74,7 @@ namespace RestApi.Controllers
             return Ok(downloadUrl);
         }
 
+        [Authorize(Roles = "client")]
         [HttpPost("pushModel")]
         public async Task<IActionResult> PushModel([FromBody] FileContent fileContent)
         {
@@ -137,6 +141,10 @@ namespace RestApi.Controllers
             startTraining = true;
 
             var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, "client_mnist_model_");
+            if (!r)
+            {
+                Console.WriteLine("Failed to cleanup client models");
+            }
 
             return Ok("Training can be started!");
         }

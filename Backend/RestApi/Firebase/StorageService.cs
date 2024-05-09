@@ -103,7 +103,7 @@ namespace RestApi.Firebase
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(i + " client models deleted");
+                    Console.WriteLine(i-1 + " client models deleted");
                     break;
                 }
             }
