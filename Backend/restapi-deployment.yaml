@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: restapi
-        image: acrlicenta.azurecr.io/restapi:latest
+        image: manouser/restapi:latest
         ports:
         - containerPort: 8080
           name: restapi-http
@@ -29,21 +29,21 @@ spec:
             memory: 512Mi
         startupProbe:
           httpGet:
-            path: /mnist/ping
+            path: /general/ping
             port: 8080
           failureThreshold: 3
           initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:
-            path: /mnist/ping
+            path: /general/ping
             port: 8080
           failureThreshold: 3
           initialDelaySeconds: 3
           periodSeconds: 3
         livenessProbe:
           httpGet:
-            path: /mnist/ping
+            path: /general/ping
             port: 8080
           failureThreshold: 5
           initialDelaySeconds: 3

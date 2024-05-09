@@ -3,19 +3,24 @@ using Microsoft.IdentityModel.Tokens;
 using RestApi.Firebase;
 using RestApi.HttpClients;
 using RestApi.MessageBroker;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).AddEnvironmentVariables();
 
-var mnistClientBaseAddress = builder.Configuration.GetConnectionString("MnistAggregatorEndpoint");
-var loggerBaseAddress = builder.Configuration.GetConnectionString("LoggerEndpoint");
-var authenticatorBaseAddress = builder.Configuration.GetConnectionString("AuthenticatorEndpoint");
+var configuration = builder.Configuration;
+configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).AddEnvironmentVariables();
+
+var mnistClientBaseAddress = configuration.GetConnectionString("MnistAggregatorEndpoint");
+var loggerBaseAddress = configuration.GetConnectionString("LoggerEndpoint");
+var authenticatorBaseAddress = configuration.GetConnectionString("AuthenticatorEndpoint");
 
 if (string.IsNullOrEmpty(mnistClientBaseAddress) || string.IsNullOrEmpty(loggerBaseAddress) || string.IsNullOrEmpty(authenticatorBaseAddress))
 {
     Console.WriteLine("One or more endpoints are missing from the configuration file!");
     return;
 }
+
+Console.WriteLine("CONFIGURARAREEEEEEE: " + configuration.GetSection("JwtSettings")["Issuer"] + " " + configuration.GetSection("JwtSettings")["Audience"] + " " + configuration.GetSection("JwtSettings")["SecretKey"]);
 
 builder.Services.AddAuthentication(authOptions =>
 {
@@ -26,9 +31,9 @@ builder.Services.AddAuthentication(authOptions =>
 {
     bearerOptions.TokenValidationParameters = new TokenValidationParameters
     {
-        //ValidIssuer = configuration.GetSection("JwtSettins")["Issuer"],
-        //ValidAudience = configuration.GetSection("JwtSettings")["Audience"],
-        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("JwtSettings")["SecretKey"]!)),
+        ValidIssuer = configuration.GetSection("JwtSettings")["Issuer"],
+        ValidAudience = configuration.GetSection("JwtSettings")["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("JwtSettings")["SecretKey"]!)),
         ValidateIssuerSigningKey = true,
         ValidateLifetime = true,
         ValidateIssuer = true,
@@ -38,7 +43,6 @@ builder.Services.AddAuthentication(authOptions =>
 
 builder.Services.AddSingleton<EventBus>();
 
-builder.Services.AddControllers();
 builder.Services.AddHttpClient<StorageService>();
 builder.Services.AddHttpClient<ILoggerService, LoggerService>(httpClient =>
     httpClient.BaseAddress = new Uri(loggerBaseAddress)
@@ -46,6 +50,8 @@ builder.Services.AddHttpClient<ILoggerService, LoggerService>(httpClient =>
 builder.Services.AddHttpClient<IAuthenticatorService, AuthenticatorService>(httpClient =>
     httpClient.BaseAddress = new Uri(authenticatorBaseAddress)
 );
+
+builder.Services.AddControllers();
 
 builder.Services.AddCors();
 
