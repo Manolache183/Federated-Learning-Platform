@@ -1,0 +1,43 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_PASS }}
+
+    - name: Build Docker Images
+      run:
+        cd ./Backend
+        docker build -f ./RestApi/Dockerfile -t manouser/restapi .
+        docker build -f ./Authenticator/Dockerfile -t manouser/authenticator .
+        docker build -f ./Logger/Dockerfile -t manouser/logger .
+        cd ./Aggregator
+        docker build . -t manouser/aggregator
+        cd ../../Kotlin-Clients
+        docker build . -t manouser/kotlin-client
+    - name: Push Docker Images to Dockerhub
+      run:
+        docker push manouser/restapi
+        docker push manouser/authenticator
+        docker push manouser/logger  
+        docker push manouser/aggregator
+        docker push manouser/kotlin-client  
+        
+
