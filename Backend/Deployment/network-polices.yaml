@@ -1,16 +1,16 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: logger-policy
+  name: authenticator-policy
   namespace: default
 spec:
-  podSelector:
-    matchLabels:
-      app: logger
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
+    podSelector:
         matchLabels:
-          app: authenticator
+        app: authenticator
+    policyTypes:
+    - Ingress
+    ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+            app: restapi    
