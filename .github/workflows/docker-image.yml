@@ -26,7 +26,7 @@ jobs:
       uses: jsdaniell/create-json@1.1.2
       with:
         name: "Backend/RestApi/appsettings.json"
-        json: ${{ secrets.RESTAPI_CONFIGT }}
+        json: ${{ secrets.RESTAPI_CONFIG }}
 
     - name: Copy the Secret Files
       run: |
