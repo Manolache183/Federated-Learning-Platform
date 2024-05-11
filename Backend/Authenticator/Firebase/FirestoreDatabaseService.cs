@@ -7,7 +7,7 @@ namespace Authenticator.Firebase
 {
     public class FirestoreDatabaseService
     {
-        private readonly string _path = AppDomain.CurrentDomain.BaseDirectory + @"federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json";
+        private readonly string _path = AppDomain.CurrentDomain.BaseDirectory + @"federated-learning-platform-secrets.json";
         private const string _projectID = "federated-learning-platf-c15c0";
         private readonly FirestoreDb _db;
 

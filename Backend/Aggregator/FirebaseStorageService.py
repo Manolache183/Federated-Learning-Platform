@@ -2,7 +2,7 @@ from firebase_admin import credentials, initialize_app, storage
 
 class FirebaseStorageService:
 	def __init__(self):
-		cred = credentials.Certificate("federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json")
+		cred = credentials.Certificate("federated-learning-platform-secrets.json")
 		initialize_app(cred, {'storageBucket': 'federated-learning-platf-c15c0.appspot.com'})
 		
 		self.bucket = storage.bucket()
