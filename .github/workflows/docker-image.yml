@@ -23,7 +23,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Docker Images
-      run:
+      run: |
         cd ./Backend
         docker build -f ./RestApi/Dockerfile -t manouser/restapi .
         docker build -f ./Authenticator/Dockerfile -t manouser/authenticator .
@@ -33,7 +33,7 @@ jobs:
         cd ../../Kotlin-Clients
         docker build . -t manouser/kotlin-client
     - name: Push Docker Images to Dockerhub
-      run:
+      run: |
         docker push manouser/restapi
         docker push manouser/authenticator
         docker push manouser/logger  
