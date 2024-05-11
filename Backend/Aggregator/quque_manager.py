@@ -14,7 +14,7 @@ class QueueManager:
             try:
                 print("Connecting to RabbitMQ")
                 credentials = pika.PlainCredentials('guest', 'guest')
-                self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', port=5672, credentials=credentials))
+                self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq-service', port=5672, credentials=credentials))
                 self.channel = self.connection.channel()
                 self.channel.queue_declare(queue='work_queue', durable=True)
                 self.channel.queue_declare(queue='results_queue', durable=True)

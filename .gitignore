@@ -25,3 +25,7 @@ Backend/Authenticator/bin/
 /Kotlin-Clients/gradle/
 /Backend/Aggregator/federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json
 /Backend/Authenticator/federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json
+/Backend/RestApi/federated-learning-platform-secrets.json
+/Backend/Logger/federated-learning-platform-secrets.json
+/Backend/federated-learning-platform-secrets.json
+/Backend/Aggregator/federated-learning-platform-secrets.json

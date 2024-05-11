@@ -7,7 +7,7 @@ import java.lang.Thread.sleep
 object HttpClient {
     private val client = OkHttpClient()
 
-    private const val serverUrl = "http://restapi:8080"
+    private const val serverUrl = "http://host.docker.internal:8080"
     fun pingServer() {
         val url = "$serverUrl/general/ping"
         val request = Request.Builder()
@@ -43,7 +43,8 @@ object HttpClient {
             return
         }
 
-        sleep(1000)
+        println("Waiting for the others to push their models - this will be changed in the future")
+        sleep(10000)
 
         while(!pullCurrentModel(jwtToken)) {
             println("Failed to pull final model, retrying in 10 seconds")

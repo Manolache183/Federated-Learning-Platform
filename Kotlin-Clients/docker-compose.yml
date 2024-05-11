@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  kotlin-client:
+#    image: kotlin-client
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+    image: manouser/kotlin-client:latest
+    deploy:
+      mode: replicated
+      replicas: 3

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-balancer-restapi
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: restapi-http
+  - port: 8081
+    targetPort: 8081
+    name: restapi-https
+  selector:
+    app: restapi
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logger-service
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: logger-http
+  - port: 8081
+    targetPort: 8081
+    name: logger-https
+  selector:
+    app: logger
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authenticator-service
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: auth-http
+  - port: 8081
+    targetPort: 8081
+    name: auth-https
+  selector:
+    app: authenticator
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+spec:
+  ports:
+  - port: 5672
+    targetPort: 5672
+    name: rabbitmq-port
+  selector:
+    app: rabbitmq
+  type: ClusterIP
