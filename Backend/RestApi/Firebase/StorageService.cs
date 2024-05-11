@@ -5,7 +5,7 @@ namespace RestApi.Firebase
 {
     public class StorageService
     {
-        private readonly string _path = AppDomain.CurrentDomain.BaseDirectory + @"federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json";
+        private readonly string _path = AppDomain.CurrentDomain.BaseDirectory + @"federated-learning-platform-secrets.json";
         private const string _bucket = "federated-learning-platf-c15c0.appspot.com";
         private const string _aggregatedModelsFolder = "aggregatedModels";
         private const string _clientModelsFolder = "clientModels";

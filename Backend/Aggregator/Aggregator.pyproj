@@ -29,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dockerfile" />
-    <Content Include="federated-learning-platf-c15c0-firebase-adminsdk-slcw0-90585331c4.json" />
+    <Content Include="federated-learning-platform-secrets.json" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
