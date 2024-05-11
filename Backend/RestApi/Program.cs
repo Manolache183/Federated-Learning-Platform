@@ -10,17 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).AddEnvironmentVariables();
 
-var mnistClientBaseAddress = configuration.GetConnectionString("MnistAggregatorEndpoint");
 var loggerBaseAddress = configuration.GetConnectionString("LoggerEndpoint");
 var authenticatorBaseAddress = configuration.GetConnectionString("AuthenticatorEndpoint");
 
-if (string.IsNullOrEmpty(mnistClientBaseAddress) || string.IsNullOrEmpty(loggerBaseAddress) || string.IsNullOrEmpty(authenticatorBaseAddress))
+if (string.IsNullOrEmpty(loggerBaseAddress) || string.IsNullOrEmpty(authenticatorBaseAddress))
 {
     Console.WriteLine("One or more endpoints are missing from the configuration file!");
     return;
 }
-
-Console.WriteLine("CONFIGURARAREEEEEEE: " + configuration.GetSection("JwtSettings")["Issuer"] + " " + configuration.GetSection("JwtSettings")["Audience"] + " " + configuration.GetSection("JwtSettings")["SecretKey"]);
 
 builder.Services.AddAuthentication(authOptions =>
 {

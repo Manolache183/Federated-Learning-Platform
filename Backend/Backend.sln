@@ -11,15 +11,15 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Aggregator", "Aggregator\Ag
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "Logger\Logger.csproj", "{4143C9CB-3CC6-482B-8F51-56CC723E3B4D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{345F8344-3FDB-4E89-BCBE-39AFDC0EF704}"
-	ProjectSection(SolutionItems) = preProject
-		curl-pod.yaml = curl-pod.yaml
-		logger-deployment.yaml = logger-deployment.yaml
-		restapi-deployment.yaml = restapi-deployment.yaml
-		services.yaml = services.yaml
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authenticator", "Authenticator\Authenticator.csproj", "{1F955EB8-100F-448E-8AE2-EDE6CB298978}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{1D6BE8FB-8234-4AE8-A8F5-E0AB221FE554}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\deployments.yaml = Deployment\deployments.yaml
+		Deployment\network-polices.yaml = Deployment\network-polices.yaml
+		Deployment\services.yaml = Deployment\services.yaml
+		Deployment\volumes.yaml = Deployment\volumes.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

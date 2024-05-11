@@ -17,7 +17,6 @@ namespace RestApi.Controllers
         [HttpGet("ping")]
         public async Task<IActionResult> Ping()
         {
-            Console.WriteLine("Pinged");
             return await Task.Run(Ok);
         }
 

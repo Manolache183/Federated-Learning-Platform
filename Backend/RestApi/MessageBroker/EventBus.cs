@@ -10,7 +10,7 @@ namespace RestApi.MessageBroker
         private IConnection _connection;
         private IModel _channel;
         private IBasicProperties _properties;
-        private const string _hostName = "rabbitmq";
+        private const string _hostName = "rabbitmq-service";
         private const string _userName = "guest";
         private const string _password = "guest";
 
@@ -53,6 +53,7 @@ namespace RestApi.MessageBroker
                     _channel = _connection.CreateModel();
                     _properties = _channel.CreateBasicProperties();
                     
+                    Console.WriteLine("Connected to RabbitMQ.");
                     return true;
                 } catch
                 {
