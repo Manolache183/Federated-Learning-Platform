@@ -78,6 +78,7 @@ namespace RestApi.Controllers
         [HttpPost("pushModel")]
         public async Task<IActionResult> PushModel([FromBody] FileContent fileContent)
         {
+            // test
             if (_eventBus.aggregationInProgress)
             {
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Agregation already started!");
