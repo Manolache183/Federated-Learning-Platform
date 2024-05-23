@@ -101,7 +101,7 @@ namespace RestApi.Firebase
                     await _db.Child(_clientModelsFolder).Child(algorithmName.ToString()).Child(clientModelName).DeleteAsync();
                     Console.WriteLine("Deleted model: " + clientModelName);
                 }
-                catch (Exception e)
+                catch
                 {
                     Console.WriteLine(i-1 + " client models deleted");
                     break;

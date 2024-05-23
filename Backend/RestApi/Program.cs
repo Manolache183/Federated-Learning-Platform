@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using RestApi.Firebase;
 using RestApi.HttpClients;
+using RestApi.Learning;
 using RestApi.MessageBroker;
 using System.Text;
 
@@ -38,6 +39,7 @@ builder.Services.AddAuthentication(authOptions =>
     };
 });
 
+builder.Services.AddSingleton<CacheService>();
 builder.Services.AddSingleton<EventBus>();
 
 builder.Services.AddHttpClient<StorageService>();
@@ -47,6 +49,8 @@ builder.Services.AddHttpClient<ILoggerService, LoggerService>(httpClient =>
 builder.Services.AddHttpClient<IAuthenticatorService, AuthenticatorService>(httpClient =>
     httpClient.BaseAddress = new Uri(authenticatorBaseAddress)
 );
+
+builder.Services.AddScoped<LearningManager>();
 
 builder.Services.AddControllers();
 
