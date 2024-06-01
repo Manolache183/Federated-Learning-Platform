@@ -3,39 +3,31 @@ using RestApi.DTOS;
 using RestApi.Firebase;
 using RestApi.HttpClients;
 using RestApi.MessageBroker;
-using System.Net;
 using System.Text;
 
 namespace RestApi.Learning
 {
     public class LearningManager
     {
+        private readonly CacheService _cacheService;
         private readonly ILoggerService _loggerService;
         private readonly EventBus _eventBus;
         private readonly StorageService _firebaseStorageService;
 
-        private readonly string _algorithmName;
-        private readonly int _clientsThresholdToStartTraining;
+        public AlgorithmName AlgorithmName { get; set; } // this needs to be set based on path
+        private readonly int _clientsThresholdToStartTraining = 3;
 
-        private static bool _startTraining = false; // from redis
-        private static int _pushedClients = 0; // from redis
-        private static object? _pushedClientsLock;
-
-        public LearningManager(ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService, object pushedClientsLock, int clientsThresholdToStartTraining = 3, string algorithmName = "mnist")
+        public LearningManager(CacheService cacheService, ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService)
         {
+            _cacheService = cacheService;
             _loggerService = loggerService;
             _eventBus = eventBus;
             _firebaseStorageService = firebaseStorageService;
-
-            _clientsThresholdToStartTraining = clientsThresholdToStartTraining;
-            _algorithmName = algorithmName;
-
-            _pushedClientsLock = pushedClientsLock;
         }
 
-        public async Task<bool> CheckIfTrainingShouldStart()
+        public async Task<bool> CheckIfTrainingShouldStartAsync()
         {
-            if (!_startTraining || _eventBus.aggregationInProgress)
+            if (!_cacheService.GetStartTraining(AlgorithmName) || _eventBus.aggregationInProgress)
             {
                 Console.WriteLine("Server is not prepared to start training!");
                 return false;
@@ -50,33 +42,25 @@ namespace RestApi.Learning
             return true;
         }
 
-        public async Task<bool> GetModelDownloadUrl()
+        public async Task<string?> GetModelDownloadUrlAsync()
         {
             if (_eventBus.aggregationInProgress)
             {
-                Console.WriteLine("Agregation in progress!"); // aici cam e Service unavailable
-                return false;
+                Console.WriteLine("Agregation in progress!");
+                return null;
             }
 
             var fileMetadata = await _loggerService.GetFileMetadata("current_mnist_model");
             if (fileMetadata == null)
             {
                 Console.WriteLine("Model not found!");
-                return false;
+                return null;
             }
 
-            var downloadUrl = await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.mnist, fileMetadata.firebaseStorageID);
-            if (downloadUrl == null)
-            {
-                _startTraining = false;
-                Console.WriteLine("Failed to get download url!");
-                return false;
-            }
-
-            return true;
+            return await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.mnist, fileMetadata.firebaseStorageID);
         }
 
-        public async Task<bool> PushFlow(FileContent fileContent)
+        public async Task<bool> PushFlowAsync(FileContent fileContent)
         {
             if (_eventBus.aggregationInProgress)
             {
@@ -84,7 +68,7 @@ namespace RestApi.Learning
                 return false;
             }
 
-            var clientNumber = await PushClientModel(fileContent);
+            var clientNumber = await PushClientModelAsync(fileContent);
             if (clientNumber == -1)
             {
                 return false;
@@ -92,10 +76,10 @@ namespace RestApi.Learning
 
             if (clientNumber == _clientsThresholdToStartTraining)
             {
-                _startTraining = false;
+                _cacheService.SetStartTraining(AlgorithmName, false);
                 _eventBus.aggregationInProgress = true;
 
-                var latestModelFirebaseStorageID = await UpdateClientModels();
+                var latestModelFirebaseStorageID = await UpdateClientModelsAsync();
                 if (latestModelFirebaseStorageID == null)
                 {
                     Console.WriteLine("Failed to update client models");
@@ -108,11 +92,11 @@ namespace RestApi.Learning
             return true;
         }
 
-        public async Task<bool> StartTraining()
+        public async Task<bool> StartTrainingAsync()
         {
             _eventBus.aggregationInProgress = false;
-            _pushedClients = 0;
-            _startTraining = true;
+            _cacheService.SetStartTraining(AlgorithmName, true);
+            _cacheService.InitializePushedClientsCounter();
 
             var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, "client_mnist_model_");
             if (!r)
@@ -124,16 +108,11 @@ namespace RestApi.Learning
             return true;
         }
 
-        private async Task<int> PushClientModel(FileContent fileContent)
+        private async Task<long> PushClientModelAsync(FileContent fileContent)
         {
-            int clientNumber;
-            lock (_pushedClientsLock)
-            {
-                _pushedClients++;
-                clientNumber = _pushedClients;
-            }
+            long clientNumber = _cacheService.IncrementPushedClients(AlgorithmName);
 
-            var clientModelName = "client_" + _algorithmName + "_model_" + _pushedClients;
+            var clientModelName = "client_" + AlgorithmName + "_model_" + clientNumber;
             var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent.content));
 
             var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, AlgorithmName.mnist, clientModelName);
@@ -147,7 +126,7 @@ namespace RestApi.Learning
             return clientNumber;
         }
 
-        private async Task<string?> UpdateClientModels()
+        private async Task<string?> UpdateClientModelsAsync()
         {
             var previousModelFileName = "previous_mnist_model";
             var previousModelFileMetadata = await _loggerService.GetFileMetadata(previousModelFileName);
