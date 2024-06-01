@@ -1,4 +1,5 @@
-﻿using RestApi.Common;
+﻿using Newtonsoft.Json;
+using RestApi.Common;
 using RestApi.DTOS;
 using RestApi.Firebase;
 using RestApi.HttpClients;
@@ -60,7 +61,7 @@ namespace RestApi.Learning
             return await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.mnist, fileMetadata.firebaseStorageID);
         }
 
-        public async Task<bool> PushFlowAsync(FileContent fileContent)
+        public async Task<bool> PushFlowAsync(List<ModelParameter> modelParameters)
         {
             if (_eventBus.aggregationInProgress)
             {
@@ -68,7 +69,7 @@ namespace RestApi.Learning
                 return false;
             }
 
-            var clientNumber = await PushClientModelAsync(fileContent);
+            var clientNumber = await PushClientModelAsync(modelParameters);
             if (clientNumber == -1)
             {
                 return false;
@@ -108,12 +109,15 @@ namespace RestApi.Learning
             return true;
         }
 
-        private async Task<long> PushClientModelAsync(FileContent fileContent)
+        private async Task<long> PushClientModelAsync(List<ModelParameter> modelParameters)
         {
             long clientNumber = _cacheService.IncrementPushedClients(AlgorithmName);
 
             var clientModelName = "client_" + AlgorithmName + "_model_" + clientNumber;
-            var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent.content));
+            //var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent.content));
+
+            var model = ParseParameters(modelParameters);
+            var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(model));
 
             var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, AlgorithmName.mnist, clientModelName);
             if (!r)
@@ -124,6 +128,19 @@ namespace RestApi.Learning
 
             Console.WriteLine("Model pushed successfully: " + clientModelName);
             return clientNumber;
+        }
+
+        private string ParseParameters(List<ModelParameter> modelParameters)
+        {
+            var allParameters = new Dictionary<string, string>();
+            foreach (var param in modelParameters)
+            {
+                byte[] layerBytes = Convert.FromBase64String(param.value);
+                Console.WriteLine("Layer: " + param.name + " Data: " + layerBytes.Length + " bytes");
+                allParameters[param.name] = param.value;
+            }
+
+            return JsonConvert.SerializeObject(allParameters);
         }
 
         private async Task<string?> UpdateClientModelsAsync()

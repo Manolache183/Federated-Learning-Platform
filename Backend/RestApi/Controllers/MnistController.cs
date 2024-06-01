@@ -48,9 +48,9 @@ namespace RestApi.Controllers
 
         [Authorize(Roles = "client")]
         [HttpPost("pushModel")]
-        public async Task<IActionResult> PushModel([FromBody] FileContent fileContent)
+        public async Task<IActionResult> PushModel([FromBody] List<ModelParameter> modelParameters)
         {
-            var r = await _learningManager.PushFlowAsync(fileContent);
+            var r = await _learningManager.PushFlowAsync(modelParameters);
             if (!r)
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, "Server problem");
