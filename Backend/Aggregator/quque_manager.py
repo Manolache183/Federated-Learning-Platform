@@ -1,6 +1,9 @@
+from typing import List, cast
 import pika
 import time
+import numpy as np
 from pika import credentials
+from aggregate import NDArray, aggregate, NDArrays
 from FirebaseStorageService import FirebaseStorageService
 
 class QueueManager:
@@ -21,7 +24,7 @@ class QueueManager:
                 return True
             except Exception as e:
                 print("An error occurred: ", str(e), "\nRetrying in 5 seconds")
-                time.sleep(5);
+                time.sleep(5)
         
         return False
 
@@ -30,6 +33,7 @@ class QueueManager:
             message = body.decode('utf-8')
             print(f" [x] Received {message}")
             self.simulateWork(message)
+            
             print(f" [x] Done")
             ch.basic_ack(delivery_tag=method.delivery_tag)
             self.publish("Work done!")
@@ -45,8 +49,26 @@ class QueueManager:
         
     def simulateWork(self, modelName):
         print("Simulating work...")
-        self.firebaseStorageService.downloadClientModels()
-        time.sleep(5)
-        print("Work done!")
-        self.firebaseStorageService.uploadModel(modelName)
+        parameters = self.firebaseStorageService.downloadClientModels()
         
+        converted_parameters = [
+            (self.convert_to_ndarrays(weights), num_examples)
+            for num_examples, weights in parameters
+        ]
+
+        aggregated_arrays = aggregate(converted_parameters)
+        aggregated_parameters = self.ndarrays_to_bytes(aggregated_arrays)
+
+        print("Work done!")
+        self.firebaseStorageService.uploadModel(modelName, aggregated_parameters)
+
+    def convert_to_ndarrays(self, weights: List[bytes]) -> NDArrays:
+        return [self.bytes_to_ndarray(weight) for weight in weights]
+
+    def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
+        """Convert bytes into NumPy array."""
+        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
+        return cast(NDArray, ndarray_deserialized)
+
+    def ndarrays_to_bytes(self, ndarrays: NDArrays) -> List[bytes]:
+        return [ndarray.tobytes() for ndarray in ndarrays]

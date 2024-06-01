@@ -7,6 +7,7 @@ WORKDIR /app
 RUN pip3 install --upgrade pip #&& pip install -r requirements
 RUN pip3 install pika
 RUN pip3 install firebase_admin
+RUN pip3 install numpy
 
 COPY . .
 
