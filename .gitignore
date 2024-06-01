@@ -29,3 +29,5 @@ Backend/Authenticator/bin/
 /Backend/Logger/federated-learning-platform-secrets.json
 /Backend/federated-learning-platform-secrets.json
 /Backend/Aggregator/federated-learning-platform-secrets.json
+/Backend/localhost-key.pem
+/Backend/localhost.pem

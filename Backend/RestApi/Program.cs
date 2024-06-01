@@ -1,10 +1,15 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using RestApi.Firebase;
+using Polly;
+using Polly.Retry;
+using Polly.CircuitBreaker;
 using RestApi.HttpClients;
 using RestApi.Learning;
 using RestApi.MessageBroker;
 using System.Text;
+using RestApi.Firebase;
+using Polly.Extensions.Http;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,13 +47,28 @@ builder.Services.AddAuthentication(authOptions =>
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddSingleton<EventBus>();
 
-builder.Services.AddHttpClient<StorageService>();
+HttpStatusCode[] retryCodes = [HttpStatusCode.ServiceUnavailable, HttpStatusCode.GatewayTimeout, HttpStatusCode.BadGateway,
+                               HttpStatusCode.NotFound, HttpStatusCode.RequestTimeout, HttpStatusCode.TooManyRequests];
+AsyncRetryPolicy<HttpResponseMessage> retryPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .OrResult(r => Array.Exists(retryCodes, statusCode => statusCode == r.StatusCode))
+    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+AsyncCircuitBreakerPolicy<HttpResponseMessage> circuitBreakerPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+
+builder.Services.AddHttpClient<StorageService>()
+    .AddPolicyHandler(retryPolicy)
+    .AddPolicyHandler(circuitBreakerPolicy);
 builder.Services.AddHttpClient<ILoggerService, LoggerService>(httpClient =>
-    httpClient.BaseAddress = new Uri(loggerBaseAddress)
-);
+    httpClient.BaseAddress = new Uri(loggerBaseAddress))
+    .AddPolicyHandler(retryPolicy)
+    .AddPolicyHandler(circuitBreakerPolicy);
 builder.Services.AddHttpClient<IAuthenticatorService, AuthenticatorService>(httpClient =>
-    httpClient.BaseAddress = new Uri(authenticatorBaseAddress)
-);
+    httpClient.BaseAddress = new Uri(authenticatorBaseAddress))
+    .AddPolicyHandler(retryPolicy)
+    .AddPolicyHandler(circuitBreakerPolicy);
 
 builder.Services.AddScoped<LearningManager>();
 
