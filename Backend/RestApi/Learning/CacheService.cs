@@ -16,26 +16,33 @@ namespace RestApi.Learning
             _connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString);
         }
 
-        public long IncrementPushedClients(AlgorithmName algorithm)
+        public long IncrementPushedClients(AlgorithmName algorithm, string clientID)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _pushedClientsPrefix + algorithm;
+            var key = _pushedClientsPrefix + clientID + "_" + algorithm;
 
             return db.StringIncrement(key);
         }
 
-        public bool GetStartTraining(AlgorithmName algorithm)
+        public bool GetStartTraining(AlgorithmName algorithm, string clientID)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _startTrainingPrefix + algorithm;
+            var key = _startTrainingPrefix + clientID + "_" +  algorithm;
 
-            return db.StringGet(key) == "true";
+            var value = db.StringGet(key);
+            if (value.IsNullOrEmpty)
+            {
+                SetStartTraining(algorithm, clientID, false);
+                return false;
+            }
+
+            return value == "true";
         }
 
-        public void SetStartTraining(AlgorithmName algorithm, bool value)
+        public void SetStartTraining(AlgorithmName algorithm, string clientID, bool value)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _startTrainingPrefix + algorithm;
+            var key = _startTrainingPrefix + clientID + "_" +  algorithm;
 
             if (value)
             {
@@ -44,28 +51,6 @@ namespace RestApi.Learning
             else
             {
                 db.StringSet(key, "false");
-            }
-        }
-
-        public void InitializeStartTraining()
-        {
-            foreach (AlgorithmName algorithm in Enum.GetValues(typeof(AlgorithmName)))
-            {
-                var db = _connectionMultiplexer.GetDatabase();
-                var key = _startTrainingPrefix + algorithm;
-
-                db.StringSet(key, "false");
-            }
-        }
-
-        public void InitializePushedClientsCounter()
-        {
-            foreach (AlgorithmName algorithm in Enum.GetValues(typeof(AlgorithmName)))
-            {
-                var db = _connectionMultiplexer.GetDatabase();
-                var key = _pushedClientsPrefix + algorithm;
-
-                db.StringSet(key, 0);
             }
         }
     }

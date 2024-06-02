@@ -34,9 +34,11 @@ class QueueManager:
             print(f" [x] Received {message}")
             self.simulateWork(message)
             
+            clientID = message.split("_")[0]
+            
             print(f" [x] Done")
             ch.basic_ack(delivery_tag=method.delivery_tag)
-            self.publish("Work done!")
+            self.publish(clientID)
 
         self.channel.basic_consume(queue='work_queue', on_message_callback=callback)
         self.channel.start_consuming()
@@ -49,7 +51,9 @@ class QueueManager:
         
     def simulateWork(self, modelName):
         print("Simulating work...")
-        parameters = self.firebaseStorageService.downloadClientModels()
+
+        clientID = modelName.split("_")[0]
+        parameters = self.firebaseStorageService.downloadClientModels(clientID)
         
         converted_parameters = [
             (self.convert_to_ndarrays(weights), num_examples)

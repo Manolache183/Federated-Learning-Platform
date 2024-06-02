@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 
@@ -14,7 +15,20 @@ namespace RestApi.MessageBroker
         private const string _userName = "guest";
         private const string _password = "guest";
 
+        private readonly HttpClient _client = new HttpClient();
+
+        private const string clientAddr = "http://client_adr:port";
         public bool aggregationInProgress = false;
+
+        private TrainingInfo _trainingInfo;
+        private class TrainingInfo
+        {
+            public string deviceCount { get; set; } = "3";
+            public string accuracy { get; set; } = "93.723";
+            public string startedAt { get; set; } = "";
+            public string finishedAt { get; set; } = "";
+        }
+
 
         private enum QueueName
         {
@@ -26,6 +40,7 @@ namespace RestApi.MessageBroker
         public EventBus()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
+            _client.BaseAddress = new Uri(clientAddr);
             var connected = connectToRabbitMQ();
             if (!connected)
             {
@@ -33,7 +48,7 @@ namespace RestApi.MessageBroker
             }
 
             createQueues();
-            Task.Run(() => listenForResults());
+            Task.Run(listenForResults);
         }
 
         private bool connectToRabbitMQ()
@@ -68,6 +83,10 @@ namespace RestApi.MessageBroker
 
         public void PublishAgregateMessage(string message)
         {
+            var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _trainingInfo = new TrainingInfo();
+            _trainingInfo.startedAt = timeStamp;
+
             var body = Encoding.UTF8.GetBytes(message);
 
             _channel.BasicPublish(exchange: string.Empty,
@@ -95,10 +114,31 @@ namespace RestApi.MessageBroker
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                Console.WriteLine($" [x] Received {message}");
+                
+                Console.WriteLine($" [x] Received {message}"); // message = clientID
+
+                _trainingInfo.finishedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                //notifyClient(message).Wait();
                 aggregationInProgress = false;
             };
             _channel.BasicConsume(queue: QueueName.results_queue.ToString(), autoAck: true, consumer: consumer);
         }
+
+        private async Task notifyClient(string clientID)
+        {
+            var url = new Uri("/api/projects/" + clientID + "/trainingRounds");
+            var postData = JsonConvert.SerializeObject(_trainingInfo);
+            var content = new StringContent(postData, Encoding.UTF8, "application/json");
+            
+            var response = await _client.PostAsync(url, content);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Failed to notify client");
+            }
+
+            Console.WriteLine("Client notified");
+        }
+
     }
 }

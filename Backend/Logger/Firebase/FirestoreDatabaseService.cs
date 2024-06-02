@@ -127,22 +127,24 @@ namespace Logger.Firebase
 
         public async Task<bool> SwapModelFiles(string latestModelFirebaseStorageID)
         {
-            var previousModelFileMetadata = await GetFileMetadata("previous_mnist_model");
+            var clientID = latestModelFirebaseStorageID.Split('_')[0];
+            
+            var previousModelFileMetadata = await GetFileMetadata(clientID + "_previous_mnist_model");
             if (previousModelFileMetadata == null)
             {
                 Console.WriteLine("Previous model not found");
                 return false;
             }
 
-            var currentModelFileMetadata = await GetFileMetadata("current_mnist_model");
+            var currentModelFileMetadata = await GetFileMetadata(clientID + "current_mnist_model");
             if (currentModelFileMetadata == null)
             {
                 Console.WriteLine("Current model not found");
                 return false;
             }
 
-            var previousModelFileMetadataUpdate = new FileMetadata("previous_mnist_model", Guid.Parse(currentModelFileMetadata.firebaseStorageID), DateTime.Now);
-            var currentModelFileMetadataUpdate = new FileMetadata("current_mnist_model", Guid.Parse(latestModelFirebaseStorageID), DateTime.Now);
+            var previousModelFileMetadataUpdate = new FileMetadata(clientID + "_previous_mnist_model", Guid.Parse(currentModelFileMetadata.firebaseStorageID), DateTime.Now);
+            var currentModelFileMetadataUpdate = new FileMetadata(clientID + "_current_mnist_model", Guid.Parse(latestModelFirebaseStorageID), DateTime.Now);
 
             var r = await UpdateFileMetadata(previousModelFileMetadataUpdate);
             if (!r)

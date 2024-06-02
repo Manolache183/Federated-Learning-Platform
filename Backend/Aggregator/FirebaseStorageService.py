@@ -10,8 +10,9 @@ class FirebaseStorageService:
 		
 		self.bucket = storage.bucket()
 
-	def downloadClientModels(self) -> List[Tuple[int, List[bytes]]]:
-		blobs = self.bucket.list_blobs(prefix="clientModels/mnist/client_mnist_model_")
+	def downloadClientModels(self, clientID) -> List[Tuple[int, List[bytes]]]:
+		path = f"clientModels/mnist/{clientID}_client_mnist_model_"
+		blobs = self.bucket.list_blobs(prefix=clientID)
 		parameters = []
 		for blob in blobs:
 			print("Blob name: " + blob.name)
