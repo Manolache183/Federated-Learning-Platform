@@ -98,6 +98,7 @@ namespace RestApi.Learning
         {
             _eventBus.aggregationInProgress = false;
             _cacheService.SetStartTraining(AlgorithmName, clientID, true);
+            _cacheService.InitializePushedClientsCounter(AlgorithmName, clientID);
 
             var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, clientID + "_client_mnist_model_");
             if (!r)

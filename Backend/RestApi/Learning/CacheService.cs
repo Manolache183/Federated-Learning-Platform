@@ -53,5 +53,13 @@ namespace RestApi.Learning
                 db.StringSet(key, "false");
             }
         }
+
+        public void InitializePushedClientsCounter(AlgorithmName algorithm, string clientID)
+        {
+                var db = _connectionMultiplexer.GetDatabase();
+                var key = _pushedClientsPrefix + clientID + "_" + algorithm;
+
+                db.StringSet(key, 0);
+        }
     }
 }
