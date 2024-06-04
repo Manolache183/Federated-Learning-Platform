@@ -27,10 +27,10 @@ namespace RestApi.Controllers
         [HttpGet("checkIfTrainingShouldStart/{clientID}")]
         public async Task<IActionResult> CheckIfTrainingShouldStart(string clientID)
         {
-            if (!checkClientID(clientID))
-            {
-                return StatusCode((int)HttpStatusCode.NotFound, "Invalid clientID!");
-            }
+            // if (!checkClientID(clientID))
+            // {
+            //     return StatusCode((int)HttpStatusCode.NotFound, "Invalid clientID!");
+            // }
 
             var startTraining = await _learningManager.CheckIfTrainingShouldStartAsync(clientID);
             if (!startTraining)
@@ -45,10 +45,10 @@ namespace RestApi.Controllers
         [HttpGet("getModelDownloadUrl/{clientID}")]
         public async Task<IActionResult> GetModelDownloadUrl(string clientID)
         {
-            if (!checkClientID(clientID))
-            {
-                return StatusCode((int)HttpStatusCode.NotFound, "Invalid clientID!");
-            }
+            // if (!checkClientID(clientID))
+            // {
+            //     return StatusCode((int)HttpStatusCode.NotFound, "Invalid clientID!");
+            // }
 
             var downloadUrl = await _learningManager.GetModelDownloadUrlAsync(clientID);
             if (downloadUrl == null)

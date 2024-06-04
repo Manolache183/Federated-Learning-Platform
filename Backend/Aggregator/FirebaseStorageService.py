@@ -12,7 +12,7 @@ class FirebaseStorageService:
 
 	def downloadClientModels(self, clientID) -> List[Tuple[int, List[bytes]]]:
 		path = f"clientModels/mnist/{clientID}_client_mnist_model_"
-		blobs = self.bucket.list_blobs(prefix=clientID)
+		blobs = self.bucket.list_blobs(prefix=path)
 		parameters = []
 		for blob in blobs:
 			print("Blob name: " + blob.name)

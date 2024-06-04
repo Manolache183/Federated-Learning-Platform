@@ -78,7 +78,7 @@ namespace RestApi.Learning
 
             if (clientNumber == _clientsThresholdToStartTraining)
             {
-                _cacheService.SetStartTraining(AlgorithmName, clientID, false);
+                _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, false);
                 _eventBus.aggregationInProgress = true;
 
                 var latestModelFirebaseStorageID = await UpdateClientModelsAsync(clientID);
@@ -97,7 +97,7 @@ namespace RestApi.Learning
         public async Task<bool> StartTrainingAsync(string clientID)
         {
             _eventBus.aggregationInProgress = false;
-            _cacheService.SetStartTraining(AlgorithmName, clientID, true);
+            _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, true);
             _cacheService.InitializePushedClientsCounter(AlgorithmName, clientID);
 
             var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, clientID + "_client_mnist_model_");

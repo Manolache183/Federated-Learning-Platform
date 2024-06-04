@@ -28,7 +28,7 @@ namespace RestApi.HttpClients
             return httpResponseMessage.IsSuccessStatusCode;
         }
 
-        public async Task<bool> AddFileMetadata(string fileName, Guid FirebaseStorageID)
+        public async Task<bool> AddFileMetadata(string fileName, String FirebaseStorageID)
         {
             var fileMetadata = new FileMetadataSend(fileName, FirebaseStorageID);
             var url = "/FileMetadata/addFileMetadata";
@@ -52,7 +52,7 @@ namespace RestApi.HttpClients
             return JsonSerializer.Deserialize<FileMetadata>(content);
         }
 
-        public async Task<bool> UpdateFileMetadata(string fileName, string filePath, Guid FirebaseStorageID)
+        public async Task<bool> UpdateFileMetadata(string fileName, string filePath, String FirebaseStorageID)
         {
             var fileMetadata = new FileMetadataSend(fileName, FirebaseStorageID);
             var url = "/FileMetadata/updateFileMetadata";
