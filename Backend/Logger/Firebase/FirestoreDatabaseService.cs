@@ -136,15 +136,15 @@ namespace Logger.Firebase
                 return false;
             }
 
-            var currentModelFileMetadata = await GetFileMetadata(clientID + "current_mnist_model");
+            var currentModelFileMetadata = await GetFileMetadata(clientID + "_current_mnist_model");
             if (currentModelFileMetadata == null)
             {
                 Console.WriteLine("Current model not found");
                 return false;
             }
 
-            var previousModelFileMetadataUpdate = new FileMetadata(clientID + "_previous_mnist_model", Guid.Parse(currentModelFileMetadata.firebaseStorageID), DateTime.Now);
-            var currentModelFileMetadataUpdate = new FileMetadata(clientID + "_current_mnist_model", Guid.Parse(latestModelFirebaseStorageID), DateTime.Now);
+            var previousModelFileMetadataUpdate = new FileMetadata(clientID + "_previous_mnist_model", currentModelFileMetadata.firebaseStorageID, DateTime.Now);
+            var currentModelFileMetadataUpdate = new FileMetadata(clientID + "_current_mnist_model", latestModelFirebaseStorageID, DateTime.Now);
 
             var r = await UpdateFileMetadata(previousModelFileMetadataUpdate);
             if (!r)

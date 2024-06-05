@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -23,10 +23,10 @@ namespace RestApi.MessageBroker
         private TrainingInfo _trainingInfo;
         private class TrainingInfo
         {
-            public string deviceCount { get; set; } = "3";
-            public string accuracy { get; set; } = "93.723";
-            public string startedAt { get; set; } = "";
-            public string finishedAt { get; set; } = "";
+            public int deviceCount { get; set; } = 3;
+            public double accuracy { get; set; } = 93.723;
+            public String startedAt { get; set; } = "";
+            public String finishedAt { get; set; } = "";
         }
 
 
@@ -83,7 +83,7 @@ namespace RestApi.MessageBroker
 
         public void PublishAgregateMessage(string message)
         {
-            var timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var timeStamp = DateTime.UtcNow.ToString("o");
             _trainingInfo = new TrainingInfo();
             _trainingInfo.startedAt = timeStamp;
 
@@ -117,9 +117,9 @@ namespace RestApi.MessageBroker
                 
                 Console.WriteLine($" [x] Received {message}"); // message = clientID
 
-                _trainingInfo.finishedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                _trainingInfo.finishedAt = DateTime.UtcNow.ToString("o");
 
-                //notifyClient(message).Wait();
+                notifyClient(message).Wait();
                 aggregationInProgress = false;
             };
             _channel.BasicConsume(queue: QueueName.results_queue.ToString(), autoAck: true, consumer: consumer);
@@ -127,17 +127,32 @@ namespace RestApi.MessageBroker
 
         private async Task notifyClient(string clientID)
         {
-            var url = new Uri("/api/projects/" + clientID + "/trainingRounds");
+            var url = new Uri(clientAddr + "/api/projects/" + clientID + "/trainingRounds");
             var postData = JsonConvert.SerializeObject(_trainingInfo);
             var content = new StringContent(postData, Encoding.UTF8, "application/json");
             
-            var response = await _client.PostAsync(url, content);
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Failed to notify client");
-            }
+            Console.WriteLine("Notifying client: " + _trainingInfo.deviceCount + " " + _trainingInfo.accuracy + " " + _trainingInfo.startedAt + " " + _trainingInfo.finishedAt);
 
-            Console.WriteLine("Client notified");
+            try
+            {
+            var response = await _client.PostAsync(url, content);
+                if (response.IsSuccessStatusCode)
+            {
+                    Console.WriteLine("Client notified successfully");
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to notify client. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
+            }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Request exception: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Unexpected error: {e.Message}");
+            }
         }
 
     }
