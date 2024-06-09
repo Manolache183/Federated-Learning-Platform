@@ -14,13 +14,10 @@ namespace RestApi.Controllers
         private const AlgorithmName _algorithmName = AlgorithmName.mnist;
         private readonly LearningManager _learningManager;
 
-        private readonly HashSet<string> _clientIDs = new HashSet<string>();
         public MnistController(LearningManager learningManager)
         {
             _learningManager = learningManager;
             _learningManager.AlgorithmName = _algorithmName;
-
-            _clientIDs.Add("ionut");
         }
 
         [Authorize(Roles = "client")]
