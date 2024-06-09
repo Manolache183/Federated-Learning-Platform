@@ -43,7 +43,7 @@ namespace RestApi.Controllers
             var downloadUrl = await _learningManager.GetModelDownloadUrlAsync(clientID);
             if (downloadUrl == null)
             {
-                return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Agregation in progress!");
+                return StatusCode((int)HttpStatusCode.NotFound, "No model has been aggregated yet for this client!");
             }
 
             return Ok(downloadUrl);
