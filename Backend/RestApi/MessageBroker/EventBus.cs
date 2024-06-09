@@ -115,11 +115,15 @@ namespace RestApi.MessageBroker
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 
-                Console.WriteLine($" [x] Received {message}"); // message = clientID
+                Console.WriteLine($" [x] Received {message}"); // message = clientID-accuracy
+
+                var clientID = message.Split('-')[0];
+                var accuracy = message.Split('-')[1];
 
                 _trainingInfo.finishedAt = DateTime.UtcNow.ToString("o");
+                _trainingInfo.accuracy = double.Parse(accuracy);
 
-                notifyClient(message).Wait();
+                notifyClient(clientID).Wait();
                 aggregationInProgress = false;
             };
             _channel.BasicConsume(queue: QueueName.results_queue.ToString(), autoAck: true, consumer: consumer);
