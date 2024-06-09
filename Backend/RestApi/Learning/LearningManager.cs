@@ -15,7 +15,7 @@ namespace RestApi.Learning
         private readonly EventBus _eventBus;
         private readonly StorageService _firebaseStorageService;
 
-        public AlgorithmName AlgorithmName { get; set; } // this needs to be set based on path
+        public AlgorithmName AlgorithmName { get; set; }
         private readonly int _clientsThresholdToStartTraining = 3;
 
         public LearningManager(CacheService cacheService, ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService)
@@ -26,9 +26,9 @@ namespace RestApi.Learning
             _firebaseStorageService = firebaseStorageService;
         }
 
-        public async Task<bool> CheckIfTrainingShouldStartAsync()
+        public async Task<bool> CheckIfTrainingShouldStartAsync(string clientID)
         {
-            if (!_cacheService.GetStartTraining(AlgorithmName) || _eventBus.aggregationInProgress)
+            if (!_cacheService.GetStartTraining(AlgorithmName, clientID) || _eventBus.aggregationInProgress)
             {
                 Console.WriteLine("Server is not prepared to start training!");
                 return false;
@@ -43,7 +43,7 @@ namespace RestApi.Learning
             return true;
         }
 
-        public async Task<string?> GetModelDownloadUrlAsync()
+        public async Task<string?> GetModelDownloadUrlAsync(string clientID)
         {
             if (_eventBus.aggregationInProgress)
             {
@@ -51,7 +51,8 @@ namespace RestApi.Learning
                 return null;
             }
 
-            var fileMetadata = await _loggerService.GetFileMetadata("current_mnist_model");
+            var currModel = clientID + "_current_mnist_model";
+            var fileMetadata = await _loggerService.GetFileMetadata(currModel);
             if (fileMetadata == null)
             {
                 Console.WriteLine("Model not found!");
@@ -61,7 +62,7 @@ namespace RestApi.Learning
             return await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.mnist, fileMetadata.firebaseStorageID);
         }
 
-        public async Task<bool> PushFlowAsync(List<ModelParameter> modelParameters)
+        public async Task<bool> PushFlowAsync(List<ModelParameter> modelParameters, string clientID)
         {
             if (_eventBus.aggregationInProgress)
             {
@@ -69,7 +70,7 @@ namespace RestApi.Learning
                 return false;
             }
 
-            var clientNumber = await PushClientModelAsync(modelParameters);
+            var clientNumber = await PushClientModelAsync(modelParameters, clientID);
             if (clientNumber == -1)
             {
                 return false;
@@ -77,10 +78,10 @@ namespace RestApi.Learning
 
             if (clientNumber == _clientsThresholdToStartTraining)
             {
-                _cacheService.SetStartTraining(AlgorithmName, false);
+                _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, false);
                 _eventBus.aggregationInProgress = true;
 
-                var latestModelFirebaseStorageID = await UpdateClientModelsAsync();
+                var latestModelFirebaseStorageID = await UpdateClientModelsAsync(clientID);
                 if (latestModelFirebaseStorageID == null)
                 {
                     Console.WriteLine("Failed to update client models");
@@ -93,13 +94,13 @@ namespace RestApi.Learning
             return true;
         }
 
-        public async Task<bool> StartTrainingAsync()
+        public async Task<bool> StartTrainingAsync(string clientID)
         {
             _eventBus.aggregationInProgress = false;
-            _cacheService.SetStartTraining(AlgorithmName, true);
-            _cacheService.InitializePushedClientsCounter();
+            _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, true);
+            _cacheService.InitializePushedClientsCounter(AlgorithmName, clientID);
 
-            var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, "client_mnist_model_");
+            var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, clientID + "_client_mnist_model_");
             if (!r)
             {
                 Console.WriteLine("Failed to cleanup client models");
@@ -109,12 +110,11 @@ namespace RestApi.Learning
             return true;
         }
 
-        private async Task<long> PushClientModelAsync(List<ModelParameter> modelParameters)
+        private async Task<long> PushClientModelAsync(List<ModelParameter> modelParameters, string clientID)
         {
-            long clientNumber = _cacheService.IncrementPushedClients(AlgorithmName);
+            long clientNumber = _cacheService.IncrementPushedClients(AlgorithmName, clientID);
 
-            var clientModelName = "client_" + AlgorithmName + "_model_" + clientNumber;
-            //var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent.content));
+            var clientModelName = clientID + "_client_" + AlgorithmName + "_model_" + clientNumber;
 
             var model = ParseParameters(modelParameters);
             var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(model));
@@ -143,9 +143,9 @@ namespace RestApi.Learning
             return JsonConvert.SerializeObject(allParameters);
         }
 
-        private async Task<string?> UpdateClientModelsAsync()
+        private async Task<string?> UpdateClientModelsAsync(string clientID)
         {
-            var previousModelFileName = "previous_mnist_model";
+            var previousModelFileName = clientID + "_previous_mnist_model";
             var previousModelFileMetadata = await _loggerService.GetFileMetadata(previousModelFileName);
             if (previousModelFileMetadata != null)
             {
@@ -157,7 +157,7 @@ namespace RestApi.Learning
                 return null;
             }
 
-            var latestModelFirebaseStorageID = Guid.NewGuid().ToString();
+            var latestModelFirebaseStorageID = clientID + "_" + Guid.NewGuid().ToString();
             var r = await _loggerService.SwapModelFiles(latestModelFirebaseStorageID);
             if (!r)
             {
