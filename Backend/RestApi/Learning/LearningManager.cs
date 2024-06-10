@@ -127,6 +127,23 @@ namespace RestApi.Learning
             return true;
         }
 
+        public async Task<bool> InitializeFileMetadata(string clientID)
+        {
+            var previousModelFileName = clientID + "_previous_mnist_model";
+            var currentModelFileName = clientID + "_current_mnist_model";
+
+            var previousModelFileMetadata = await _loggerService.AddFileMetadata(previousModelFileName, "NA");
+            var currentModelFileMetadata = await _loggerService.AddFileMetadata(currentModelFileName, "NA");
+
+            if (!previousModelFileMetadata || !currentModelFileMetadata)
+            {
+                Console.WriteLine("Failed to add file metadata");
+                return false;
+            }
+
+            return true;
+        }
+
         private async Task<long> PushClientModelAsync(List<ModelParameter> modelParameters, string clientID)
         {
             long clientNumber = _cacheService.IncrementPushedClients(AlgorithmName, clientID);
@@ -164,17 +181,24 @@ namespace RestApi.Learning
         {
             var previousModelFileName = clientID + "_previous_mnist_model";
             var previousModelFileMetadata = await _loggerService.GetFileMetadata(previousModelFileName);
-            if (previousModelFileMetadata != null)
-            {
-                await _firebaseStorageService.DeleteModel(AlgorithmName.mnist, previousModelFileMetadata.firebaseStorageID);
-            }
-            else
+
+            if(previousModelFileMetadata == null)
             {
                 Console.WriteLine("Previous model not found");
                 return null;
             }
 
+            if (previousModelFileMetadata.firebaseStorageID != "NA")
+            {
+                await _firebaseStorageService.DeleteModel(AlgorithmName.mnist, previousModelFileMetadata.firebaseStorageID);
+            }
+            else
+            {
+                Console.WriteLine("Previous file metadata points to nothing, first or second training round");
+            }
+
             var latestModelFirebaseStorageID = clientID + "_" + Guid.NewGuid().ToString();
+
             var r = await _loggerService.SwapModelFiles(latestModelFirebaseStorageID);
             if (!r)
             {

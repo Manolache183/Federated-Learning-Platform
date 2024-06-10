@@ -70,5 +70,18 @@ namespace RestApi.Controllers
 
             return Ok("Training can be started!");
         }
+
+        [HttpPost("initializeFileMetadata/{clientID}")]
+        public async Task<IActionResult> InitializeFileMetadata(string clientID)
+        {
+            var r = await _learningManager.InitializeFileMetadata(clientID);
+            if (!r)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Server problem");
+            }
+
+            return Ok("File metadata initialized!");
+        }
+          
     }
 }
