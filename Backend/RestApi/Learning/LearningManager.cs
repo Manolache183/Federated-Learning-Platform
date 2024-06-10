@@ -14,26 +14,43 @@ namespace RestApi.Learning
         private readonly ILoggerService _loggerService;
         private readonly EventBus _eventBus;
         private readonly StorageService _firebaseStorageService;
+        private readonly IClientPlatformService _clientPlatformService;
 
         public AlgorithmName AlgorithmName { get; set; }
         private readonly int _clientsThresholdToStartTraining = 3;
 
-        public LearningManager(CacheService cacheService, ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService)
+        public LearningManager(CacheService cacheService, ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService, IClientPlatformService clientPlatformService)
         {
             _cacheService = cacheService;
             _loggerService = loggerService;
             _eventBus = eventBus;
             _firebaseStorageService = firebaseStorageService;
+            _clientPlatformService = clientPlatformService;
         }
 
         public async Task<bool> CheckIfTrainingShouldStartAsync(string clientID)
         {
-            if (!_cacheService.GetStartTraining(AlgorithmName, clientID) || _eventBus.aggregationInProgress)
+            if (_eventBus.aggregationInProgress)
             {
                 Console.WriteLine("Server is not prepared to start training!");
                 return false;
             }
 
+            if (!_cacheService.GetStartTraining(AlgorithmName, clientID))
+            {
+                var trainingInterval = await _clientPlatformService.GetClientTrainingInterval(clientID);
+                var lastTrainingTimestamp = _cacheService.GetLastTrainingTimestamp(AlgorithmName, clientID);
+
+                if (DateTime.Now - lastTrainingTimestamp < TimeSpan.FromMinutes(trainingInterval))
+                {
+                    Console.WriteLine("Client is not ready to start training!");
+                    return false;
+                }
+
+                _cacheService.SetLastTrainingTimestamp(AlgorithmName, clientID, DateTime.Now);
+                _cacheService.SetStartTraining(AlgorithmName, clientID, true);
+            }
+            
             var r = await _loggerService.LogAsync("Training is about to start!");
             if (!r)
             {

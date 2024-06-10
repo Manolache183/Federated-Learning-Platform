@@ -18,8 +18,9 @@ configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: tr
 
 var loggerBaseAddress = configuration.GetConnectionString("LoggerEndpoint");
 var authenticatorBaseAddress = configuration.GetConnectionString("AuthenticatorEndpoint");
+var clientPlatformBaseAddress = configuration.GetConnectionString("ClientPlatformEndpoint");
 
-if (string.IsNullOrEmpty(loggerBaseAddress) || string.IsNullOrEmpty(authenticatorBaseAddress))
+if (string.IsNullOrEmpty(loggerBaseAddress) || string.IsNullOrEmpty(authenticatorBaseAddress) || string.IsNullOrEmpty(clientPlatformBaseAddress))
 {
     Console.WriteLine("One or more endpoints are missing from the configuration file!");
     return;
@@ -67,6 +68,10 @@ builder.Services.AddHttpClient<ILoggerService, LoggerService>(httpClient =>
     .AddPolicyHandler(circuitBreakerPolicy);
 builder.Services.AddHttpClient<IAuthenticatorService, AuthenticatorService>(httpClient =>
     httpClient.BaseAddress = new Uri(authenticatorBaseAddress))
+    .AddPolicyHandler(retryPolicy)
+    .AddPolicyHandler(circuitBreakerPolicy);
+builder.Services.AddHttpClient<IClientPlatformService, ClientPlatformService>(httpClient =>
+    httpClient.BaseAddress = new Uri(clientPlatformBaseAddress))
     .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(circuitBreakerPolicy);
 

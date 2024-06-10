@@ -1,6 +1,8 @@
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RestApi.Common;
+using RestApi.HttpClients;
 using System.Text;
 
 namespace RestApi.MessageBroker
@@ -15,20 +17,12 @@ namespace RestApi.MessageBroker
         private const string _userName = "guest";
         private const string _password = "guest";
 
-        private readonly HttpClient _client = new HttpClient();
+        private readonly IClientPlatformService _clientPlatformService;
 
         private const string clientAddr = "http://client_adr:port";
         public bool aggregationInProgress = false;
 
         private TrainingInfo _trainingInfo;
-        private class TrainingInfo
-        {
-            public int deviceCount { get; set; } = 3;
-            public double accuracy { get; set; } = 93.723;
-            public String startedAt { get; set; } = "";
-            public String finishedAt { get; set; } = "";
-        }
-
 
         private enum QueueName
         {
@@ -37,10 +31,11 @@ namespace RestApi.MessageBroker
         }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public EventBus()
+        public EventBus(IClientPlatformService clientPlatformService)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
-            _client.BaseAddress = new Uri(clientAddr);
+            _clientPlatformService = clientPlatformService;
+
             var connected = connectToRabbitMQ();
             if (!connected)
             {
@@ -123,41 +118,11 @@ namespace RestApi.MessageBroker
                 _trainingInfo.finishedAt = DateTime.UtcNow.ToString("o");
                 _trainingInfo.accuracy = double.Parse(accuracy);
 
-                notifyClient(clientID).Wait();
+                _clientPlatformService.NotifyClient(clientID, _trainingInfo).Wait();
+                
                 aggregationInProgress = false;
             };
             _channel.BasicConsume(queue: QueueName.results_queue.ToString(), autoAck: true, consumer: consumer);
         }
-
-        private async Task notifyClient(string clientID)
-        {
-            var url = new Uri(clientAddr + "/api/projects/" + clientID + "/trainingRounds");
-            var postData = JsonConvert.SerializeObject(_trainingInfo);
-            var content = new StringContent(postData, Encoding.UTF8, "application/json");
-            
-            Console.WriteLine("Notifying client: " + _trainingInfo.deviceCount + " " + _trainingInfo.accuracy + " " + _trainingInfo.startedAt + " " + _trainingInfo.finishedAt);
-
-            try
-            {
-            var response = await _client.PostAsync(url, content);
-                if (response.IsSuccessStatusCode)
-            {
-                    Console.WriteLine("Client notified successfully");
-                }
-                else
-                {
-                    Console.WriteLine($"Failed to notify client. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
-            }
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine($"Request exception: {e.Message}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Unexpected error: {e.Message}");
-            }
-        }
-
     }
 }
