@@ -14,8 +14,7 @@ namespace RestApi.HttpClients
 
         public async Task NotifyClient(string clientID, TrainingInfo trainingInfo)
         {
-            // var url = new Uri("/api/projects/" + clientID + "/trainingRounds"); // e setat base addr ul in Program.cs, eu zic ca merge
-            var url = $"/api/projects/{clientID}/trainingRounds"; // daca nu merge cel de sus, incearca cu asta
+            var url = $"/api/projects/{clientID}/trainingRounds";
             var postData = JsonConvert.SerializeObject(trainingInfo);
             var content = new StringContent(postData, Encoding.UTF8, "application/json");
 
@@ -46,7 +45,8 @@ namespace RestApi.HttpClients
         public async Task<int> GetClientTrainingInterval(string clientID)
         {
             Console.WriteLine("Getting client timestamp");
-            var url = $"/api/projects/{clientID}"; // daca nu merge cel de sus, incearca cu asta
+
+            var url = $"/api/projects/{clientID}";
             var response = await _httpClient.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
@@ -62,6 +62,25 @@ namespace RestApi.HttpClients
             
             Console.WriteLine($"Failed to get client timestamp. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
             
+            return -1;
+        }
+
+        public async Task<int> GetClientThreshold(string clientID)
+        {
+            var url = $"/api/projects/{clientID}/threshold";
+            var response = await _httpClient.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                dynamic project = JsonConvert.DeserializeObject(content);
+
+                int threshold = project.threshold;
+                Console.WriteLine("Client threshold: " + threshold);
+
+                return threshold;
+            }
+
             return -1;
         }
     }

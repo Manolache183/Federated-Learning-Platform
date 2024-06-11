@@ -9,6 +9,7 @@ namespace RestApi.Learning
         private const string _pushedClientsPrefix = "pushedClients_";
         private const string _startTrainingPrefix = "startTraining_";
         private const string _lastTrainingPrefix = "lastTrainingTimestamp_";
+        private const string _clientsThresholdPrefix = "clientsThresholdToStartTraining_";
 
         private readonly ConnectionMultiplexer _connectionMultiplexer;
         
@@ -83,6 +84,28 @@ namespace RestApi.Learning
             }
 
             return DateTime.Parse(value);
+        }
+
+        public void SetClientsThresholdToStartTraining(AlgorithmName algorithm, string clientID, int threshold)
+        {
+            var db = _connectionMultiplexer.GetDatabase();
+            var key = _clientsThresholdPrefix + clientID + "_" + algorithm;
+
+            db.StringSet(key, threshold);
+        }
+
+        public int GetClientsThresholdToStartTraining(AlgorithmName algorithm, string clientID)
+        {
+            var db = _connectionMultiplexer.GetDatabase();
+            var key = _clientsThresholdPrefix + clientID + "_" + algorithm;
+
+            var value = db.StringGet(key);
+            if (value.IsNullOrEmpty)
+            {
+                return -1;
+            }
+
+            return (int)value;
         }
     }
 }

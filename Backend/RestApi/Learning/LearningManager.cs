@@ -16,8 +16,9 @@ namespace RestApi.Learning
         private readonly StorageService _firebaseStorageService;
         private readonly IClientPlatformService _clientPlatformService;
 
+        private const int _defaultClientsThresholdToStartTraining = 3;
+
         public AlgorithmName AlgorithmName { get; set; }
-        private readonly int _clientsThresholdToStartTraining = 3;
 
         public LearningManager(CacheService cacheService, ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService, IClientPlatformService clientPlatformService)
         {
@@ -93,7 +94,14 @@ namespace RestApi.Learning
                 return false;
             }
 
-            if (clientNumber == _clientsThresholdToStartTraining)
+            var clientsThreshold = _cacheService.GetClientsThresholdToStartTraining(AlgorithmName, clientID);
+            if (clientsThreshold == -1)
+            {
+                clientsThreshold = await InitializeClientsThreshold(clientID);
+                _cacheService.SetClientsThresholdToStartTraining(AlgorithmName, clientID, clientsThreshold);
+            }
+
+            if (clientNumber == clientsThreshold)
             {
                 _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, false);
                 _eventBus.aggregationInProgress = true;
@@ -207,6 +215,18 @@ namespace RestApi.Learning
             }
 
             return latestModelFirebaseStorageID;
+        }
+
+        private async Task<int> InitializeClientsThreshold(string clientID)
+        {
+            var r = await _clientPlatformService.GetClientThreshold(clientID);
+            if (r == -1)
+            {
+                Console.WriteLine("Failed to get client threshold, fallback to default value: " + _defaultClientsThresholdToStartTraining);
+                return _defaultClientsThresholdToStartTraining;
+            }
+
+            return r;
         }
     }
 }
