@@ -32,13 +32,13 @@ class QueueManager:
         def callback(ch, method, properties, body):
             message = body.decode('utf-8')
             print(f" [x] Received {message}")
-            self.simulateWork(message)
+            accuracy = self.simulateWork(message)
             
             clientID = message.split("_")[0]
             
             print(f" [x] Done")
             ch.basic_ack(delivery_tag=method.delivery_tag)
-            self.publish(clientID)
+            self.publish(f"{clientID};{accuracy}")
 
         self.channel.basic_consume(queue='work_queue', on_message_callback=callback)
         self.channel.start_consuming()
@@ -49,22 +49,23 @@ class QueueManager:
     def publish(self, message):
         self.channel.basic_publish(exchange='', routing_key='results_queue', body=message)
         
-    def simulateWork(self, modelName):
+    def simulateWork(self, modelName) -> float:
         print("Simulating work...")
 
         clientID = modelName.split("_")[0]
         parameters = self.firebaseStorageService.downloadClientModels(clientID)
         
         converted_parameters = [
-            (self.convert_to_ndarrays(weights), num_examples)
-            for num_examples, weights in parameters
+            (self.convert_to_ndarrays(weights), num_examples, accuracy)
+            for num_examples, weights, accuracy in parameters
         ]
 
-        aggregated_arrays = aggregate(converted_parameters)
+        aggregated_arrays, average_accuracy = aggregate(converted_parameters)
         aggregated_parameters = self.ndarrays_to_bytes(aggregated_arrays)
 
-        print("Work done!")
+        print(f"Work done! Average accuracy: {average_accuracy}")
         self.firebaseStorageService.uploadModel(modelName, aggregated_parameters)
+        return average_accuracy
 
     def convert_to_ndarrays(self, weights: List[bytes]) -> NDArrays:
         return [self.bytes_to_ndarray(weight) for weight in weights]

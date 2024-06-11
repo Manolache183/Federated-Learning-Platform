@@ -10,18 +10,20 @@ class FirebaseStorageService:
 		
 		self.bucket = storage.bucket()
 
-	def downloadClientModels(self, clientID) -> List[Tuple[int, List[bytes]]]:
+	def downloadClientModels(self, clientID) -> List[Tuple[int, List[bytes], float]]:
 		path = f"clientModels/mnist/{clientID}_client_mnist_model_"
 		blobs = self.bucket.list_blobs(prefix=path)
 		parameters = []
 		for blob in blobs:
-			print("Blob name: " + blob.name)
 			content = blob.download_as_string()
 			parameters_dict=json.loads(content)
 			# Maybe change this to include actual examples count
 			num_examples = 1
-			model_weights = [base64.b64decode(parameters_dict[key]) for key in sorted(parameters_dict.keys())]
-			parameters.append((num_examples, model_weights))
+			model_weights = [base64.b64decode(parameters_dict[key]) for key in sorted(parameters_dict.keys()) if key != 'Accuracy']
+			accuracy = float(base64.b64decode(parameters_dict['Accuracy']))
+			
+			print("Blob name: " + blob.name + " Accuracy: " + str(accuracy))
+			parameters.append((num_examples, model_weights, accuracy))
 		return parameters
 			
 	def uploadModel(self, model_name, parameters: List[bytes]):

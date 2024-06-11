@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RestApi.Common;
@@ -13,13 +13,13 @@ namespace RestApi.MessageBroker
         private IConnection _connection;
         private IModel _channel;
         private IBasicProperties _properties;
-        private const string _hostName = "rabbitmq-service";
+        private const string _hostName = "rabbitmq";
         private const string _userName = "guest";
         private const string _password = "guest";
 
         private readonly IClientPlatformService _clientPlatformService;
 
-        private const string clientAddr = "http://client_adr:port";
+        private const string clientAddr = "http://host.docker.internal:4000";
         public bool aggregationInProgress = false;
 
         private TrainingInfo _trainingInfo;
@@ -112,11 +112,13 @@ namespace RestApi.MessageBroker
                 
                 Console.WriteLine($" [x] Received {message}"); // message = clientID-accuracy
 
-                var clientID = message.Split('-')[0];
-                var accuracy = message.Split('-')[1];
+                var clientID = message.Split(';')[0];
+                var accuracy = message.Split(';')[1];
 
                 _trainingInfo.finishedAt = DateTime.UtcNow.ToString("o");
                 _trainingInfo.accuracy = double.Parse(accuracy);
+
+                Console.WriteLine("Salut client: " + clientID);
 
                 _clientPlatformService.NotifyClient(clientID, _trainingInfo).Wait();
                 

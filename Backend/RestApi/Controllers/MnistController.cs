@@ -20,7 +20,7 @@ namespace RestApi.Controllers
             _learningManager.AlgorithmName = _algorithmName;
         }
 
-        [Authorize(Roles = "client")]
+        // [Authorize(Roles = "client")]
         [HttpGet("checkIfTrainingShouldStart/{clientID}")]
         public async Task<IActionResult> CheckIfTrainingShouldStart(string clientID)
         {
@@ -33,7 +33,7 @@ namespace RestApi.Controllers
             return Ok("Training should start!");
         }
 
-        [Authorize(Roles = "client")]
+        // [Authorize(Roles = "client")]
         [HttpGet("getModelDownloadUrl/{clientID}")]
         public async Task<IActionResult> GetModelDownloadUrl(string clientID)
         {
@@ -46,7 +46,7 @@ namespace RestApi.Controllers
             return Ok(downloadUrl);
         }
 
-        [Authorize(Roles = "client")]
+        // [Authorize(Roles = "client")]
         [HttpPost("pushModel/{clientID}")]
         public async Task<IActionResult> PushModel([FromBody] List<ModelParameter> modelParameters, string clientID)
         {
