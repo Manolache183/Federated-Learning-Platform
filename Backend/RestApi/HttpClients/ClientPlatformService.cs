@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using RestApi.Common;
 using System.Text;
 
@@ -14,7 +14,8 @@ namespace RestApi.HttpClients
 
         public async Task NotifyClient(string clientID, TrainingInfo trainingInfo)
         {
-            var url = new Uri("/api/projects/" + clientID + "/trainingRounds"); // e setat base addr ul in Program.cs, eu zic ca merge
+            // var url = new Uri("/api/projects/" + clientID + "/trainingRounds"); // e setat base addr ul in Program.cs, eu zic ca merge
+            var url = $"/api/projects/{clientID}/trainingRounds"; // daca nu merge cel de sus, incearca cu asta
             var postData = JsonConvert.SerializeObject(trainingInfo);
             var content = new StringContent(postData, Encoding.UTF8, "application/json");
 
@@ -44,15 +45,19 @@ namespace RestApi.HttpClients
 
         public async Task<int> GetClientTrainingInterval(string clientID)
         {
-            var url = new Uri("/api/projects/" + clientID + "/timestamp"); // Mitch ia vezi daca trebuie modificat url ul acesta
+            Console.WriteLine("Getting client timestamp");
+            var url = $"/api/projects/{clientID}"; // daca nu merge cel de sus, incearca cu asta
             var response = await _httpClient.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
             {
-                var timestamp = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync();
+                dynamic project = JsonConvert.DeserializeObject(content);
+
+                int timestamp = project.trainingRoundIntervalMinutes;
                 Console.WriteLine("Client timestamp: " + timestamp);
 
-                return int.Parse(timestamp);
+                return timestamp;
             }
             
             Console.WriteLine($"Failed to get client timestamp. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");

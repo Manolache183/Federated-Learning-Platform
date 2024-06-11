@@ -6,12 +6,15 @@ import numpy.typing as npt
 NDArray = npt.NDArray[Any]
 NDArrays = List[NDArray]
 
-def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
+def aggregate(results: List[Tuple[NDArrays, int, float]]) -> NDArrays:
     # Compute total number of examples
-    num_examples_total = sum([num_examples for _, num_examples in results])
+    num_examples_total = sum([num_examples for _, num_examples, _ in results])
+    accuracies_total = sum([num_examples * accuracy for _, num_examples, accuracy in results])
+
+
 
     weighted_weights = [
-        [layer * num_examples for layer in weights] for weights, num_examples in results
+        [layer * num_examples for layer in weights] for weights, num_examples, _ in results
     ]
 
     # Compute weighted average
@@ -21,4 +24,6 @@ def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
         for layer_updates in zip(*weighted_weights)
     ]
 
-    return weights_final
+    accuracy_final = accuracies_total / num_examples_total
+
+    return weights_final, accuracy_final
