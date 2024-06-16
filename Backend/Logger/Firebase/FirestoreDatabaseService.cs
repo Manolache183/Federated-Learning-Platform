@@ -129,12 +129,12 @@ namespace Logger.Firebase
         {
             var clientID = latestModelFirebaseStorageID.Split('_')[0];
             
-            var previousModelFileMetadata = await GetFileMetadata(clientID + "_previous_mnist_model");
-            if (previousModelFileMetadata == null)
-            {
-                Console.WriteLine("Previous model not found");
-                return false;
-            }
+            //var previousModelFileMetadata = await GetFileMetadata(clientID + "_previous_mnist_model");
+            //if (previousModelFileMetadata == null)
+            //{
+            //    Console.WriteLine("Previous model not found");
+            //    return false;
+            //}
 
             var currentModelFileMetadata = await GetFileMetadata(clientID + "_current_mnist_model");
             if (currentModelFileMetadata == null)

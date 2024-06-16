@@ -14,24 +14,16 @@ namespace RestApi.Controllers
         private const AlgorithmName _algorithmName = AlgorithmName.mnist;
         private readonly LearningManager _learningManager;
 
-        private readonly HashSet<string> _clientIDs = new HashSet<string>();
         public MnistController(LearningManager learningManager)
         {
             _learningManager = learningManager;
             _learningManager.AlgorithmName = _algorithmName;
-
-            _clientIDs.Add("ionut");
         }
 
-        [Authorize(Roles = "client")]
+        // [Authorize(Roles = "client")]
         [HttpGet("checkIfTrainingShouldStart/{clientID}")]
         public async Task<IActionResult> CheckIfTrainingShouldStart(string clientID)
         {
-            // if (!checkClientID(clientID))
-            // {
-            //     return StatusCode((int)HttpStatusCode.NotFound, "Invalid clientID!");
-            // }
-
             var startTraining = await _learningManager.CheckIfTrainingShouldStartAsync(clientID);
             if (!startTraining)
             {
@@ -41,25 +33,20 @@ namespace RestApi.Controllers
             return Ok("Training should start!");
         }
 
-        [Authorize(Roles = "client")]
+        // [Authorize(Roles = "client")]
         [HttpGet("getModelDownloadUrl/{clientID}")]
         public async Task<IActionResult> GetModelDownloadUrl(string clientID)
         {
-            // if (!checkClientID(clientID))
-            // {
-            //     return StatusCode((int)HttpStatusCode.NotFound, "Invalid clientID!");
-            // }
-
             var downloadUrl = await _learningManager.GetModelDownloadUrlAsync(clientID);
             if (downloadUrl == null)
             {
-                return StatusCode((int)HttpStatusCode.ServiceUnavailable, "Agregation in progress!");
+                return StatusCode((int)HttpStatusCode.NotFound, "No model has been aggregated yet for this client!");
             }
 
             return Ok(downloadUrl);
         }
 
-        [Authorize(Roles = "client")]
+        // [Authorize(Roles = "client")]
         [HttpPost("pushModel/{clientID}")]
         public async Task<IActionResult> PushModel([FromBody] List<ModelParameter> modelParameters, string clientID)
         {
@@ -84,9 +71,17 @@ namespace RestApi.Controllers
             return Ok("Training can be started!");
         }
 
-        private bool checkClientID(string clientID)
+        [HttpPost("initializeFileMetadata/{clientID}")]
+        public async Task<IActionResult> InitializeFileMetadata(string clientID)
         {
-            return _clientIDs.Contains(clientID);
+            var r = await _learningManager.InitializeFileMetadata(clientID);
+            if (!r)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Server problem");
+            }
+
+            return Ok("File metadata initialized!");
         }
+          
     }
 }
