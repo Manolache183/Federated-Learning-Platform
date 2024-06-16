@@ -3,6 +3,9 @@ from typing import List, Tuple
 import base64
 from firebase_admin import credentials, initialize_app, storage
 
+def sort_key(key):
+	return int(key.replace('Layer', ''))
+
 class FirebaseStorageService:
 	def __init__(self):
 		cred = credentials.Certificate("federated-learning-platform-secrets.json")
@@ -19,8 +22,9 @@ class FirebaseStorageService:
 			parameters_dict=json.loads(content)
 			# Maybe change this to include actual examples count
 			num_examples = 1
-			model_weights = [base64.b64decode(parameters_dict[key]) for key in sorted(parameters_dict.keys()) if key != 'Accuracy']
 			accuracy = float(base64.b64decode(parameters_dict['Accuracy']))
+			del parameters_dict['Accuracy']
+			model_weights = [base64.b64decode(parameters_dict[key]) for key in sorted(parameters_dict.keys(), key=sort_key)]
 			
 			print("Blob name: " + blob.name + " Accuracy: " + str(accuracy))
 			parameters.append((num_examples, model_weights, accuracy))
