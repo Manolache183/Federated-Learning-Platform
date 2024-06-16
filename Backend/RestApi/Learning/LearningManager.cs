@@ -18,8 +18,6 @@ namespace RestApi.Learning
 
         private const int _defaultClientsThresholdToStartTraining = 3;
 
-        public AlgorithmName AlgorithmName { get; set; }
-
         public LearningManager(CacheService cacheService, ILoggerService loggerService, EventBus eventBus, StorageService firebaseStorageService, IClientPlatformService clientPlatformService)
         {
             _cacheService = cacheService;
@@ -37,10 +35,10 @@ namespace RestApi.Learning
                 return false;
             }
 
-            if (!_cacheService.GetStartTraining(AlgorithmName, clientID))
+            if (!_cacheService.GetStartTraining(clientID))
             {
                 var trainingInterval = await _clientPlatformService.GetClientTrainingInterval(clientID);
-                var lastTrainingTimestamp = _cacheService.GetLastTrainingTimestamp(AlgorithmName, clientID);
+                var lastTrainingTimestamp = _cacheService.GetLastTrainingTimestamp(clientID);
 
                 if (DateTime.Now - lastTrainingTimestamp < TimeSpan.FromMinutes(trainingInterval))
                 {
@@ -48,8 +46,8 @@ namespace RestApi.Learning
                     return false;
                 }
 
-                _cacheService.SetLastTrainingTimestamp(AlgorithmName, clientID, DateTime.Now);
-                _cacheService.SetStartTraining(AlgorithmName, clientID, true);
+                _cacheService.SetLastTrainingTimestamp(clientID, DateTime.Now);
+                _cacheService.SetStartTraining(clientID, true);
             }
             
             var r = await _loggerService.LogAsync("Training is about to start!");
@@ -69,7 +67,7 @@ namespace RestApi.Learning
                 return null;
             }
 
-            var currModel = clientID + "_current_mnist_model";
+            var currModel = clientID + "_current_model";
             var fileMetadata = await _loggerService.GetFileMetadata(currModel);
             if (fileMetadata == null)
             {
@@ -77,7 +75,7 @@ namespace RestApi.Learning
                 return null;
             }
 
-            return await _firebaseStorageService.GetAggregatedModelFileUrl(AlgorithmName.mnist, fileMetadata.firebaseStorageID);
+            return await _firebaseStorageService.GetAggregatedModelFileUrl(fileMetadata.firebaseStorageID);
         }
 
         public async Task<bool> PushFlowAsync(List<ModelParameter> modelParameters, string clientID)
@@ -94,16 +92,16 @@ namespace RestApi.Learning
                 return false;
             }
 
-            var clientsThreshold = _cacheService.GetClientsThresholdToStartTraining(AlgorithmName, clientID);
+            var clientsThreshold = _cacheService.GetClientsThresholdToStartTraining(clientID);
             if (clientsThreshold == -1)
             {
                 clientsThreshold = await InitializeClientsThreshold(clientID);
-                _cacheService.SetClientsThresholdToStartTraining(AlgorithmName, clientID, clientsThreshold);
+                _cacheService.SetClientsThresholdToStartTraining(clientID, clientsThreshold);
             }
 
             if (clientNumber == clientsThreshold)
             {
-                _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, false);
+                _cacheService.SetStartTraining(clientID, false);
                 _eventBus.aggregationInProgress = true;
 
                 var latestModelFirebaseStorageID = await UpdateClientModelsAsync(clientID);
@@ -122,10 +120,10 @@ namespace RestApi.Learning
         public async Task<bool> StartTrainingAsync(string clientID)
         {
             _eventBus.aggregationInProgress = false;
-            _cacheService.SetStartTraining(AlgorithmName.mnist, clientID, true);
-            _cacheService.InitializePushedClientsCounter(AlgorithmName, clientID);
+            _cacheService.SetStartTraining(clientID, true);
+            _cacheService.InitializePushedClientsCounter(clientID);
 
-            var r = await _firebaseStorageService.CleanupClientModels(AlgorithmName.mnist, clientID + "_client_mnist_model_");
+            var r = await _firebaseStorageService.CleanupClientModels(clientID + "_client_model_");
             if (!r)
             {
                 Console.WriteLine("Failed to cleanup client models");
@@ -137,8 +135,8 @@ namespace RestApi.Learning
 
         public async Task<bool> InitializeFileMetadata(string clientID)
         {
-            var previousModelFileName = clientID + "_previous_mnist_model";
-            var currentModelFileName = clientID + "_current_mnist_model";
+            var previousModelFileName = clientID + "_previous_model";
+            var currentModelFileName = clientID + "_current_model";
 
             var previousModelFileMetadata = await _loggerService.AddFileMetadata(previousModelFileName, "NA");
             var currentModelFileMetadata = await _loggerService.AddFileMetadata(currentModelFileName, "NA");
@@ -154,14 +152,14 @@ namespace RestApi.Learning
 
         private async Task<long> PushClientModelAsync(List<ModelParameter> modelParameters, string clientID)
         {
-            long clientNumber = _cacheService.IncrementPushedClients(AlgorithmName, clientID);
+            long clientNumber = _cacheService.IncrementPushedClients(clientID);
 
-            var clientModelName = clientID + "_client_" + AlgorithmName + "_model_" + clientNumber;
+            var clientModelName = clientID + "_client_model_" + clientNumber;
 
             var model = ParseParameters(modelParameters);
             var fileStreamContent = new MemoryStream(Encoding.UTF8.GetBytes(model));
 
-            var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, AlgorithmName.mnist, clientModelName);
+            var r = await _firebaseStorageService.UploadClientModel(fileStreamContent, clientModelName);
             if (!r)
             {
                 Console.WriteLine("Failed to upload model");
@@ -187,7 +185,7 @@ namespace RestApi.Learning
 
         private async Task<string?> UpdateClientModelsAsync(string clientID)
         {
-            var previousModelFileName = clientID + "_previous_mnist_model";
+            var previousModelFileName = clientID + "_previous_model";
             var previousModelFileMetadata = await _loggerService.GetFileMetadata(previousModelFileName);
 
             if(previousModelFileMetadata == null)
@@ -198,7 +196,7 @@ namespace RestApi.Learning
 
             if (previousModelFileMetadata.firebaseStorageID != "NA")
             {
-                await _firebaseStorageService.DeleteModel(AlgorithmName.mnist, previousModelFileMetadata.firebaseStorageID);
+                await _firebaseStorageService.DeleteModel(previousModelFileMetadata.firebaseStorageID);
             }
             else
             {

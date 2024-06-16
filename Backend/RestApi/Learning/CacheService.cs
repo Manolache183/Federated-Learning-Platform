@@ -18,33 +18,33 @@ namespace RestApi.Learning
             _connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString);
         }
 
-        public long IncrementPushedClients(AlgorithmName algorithm, string clientID)
+        public long IncrementPushedClients(string clientID)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _pushedClientsPrefix + clientID + "_" + algorithm;
+            var key = _pushedClientsPrefix + clientID;
 
             return db.StringIncrement(key);
         }
 
-        public bool GetStartTraining(AlgorithmName algorithm, string clientID)
+        public bool GetStartTraining(string clientID)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _startTrainingPrefix + clientID + "_" +  algorithm;
+            var key = _startTrainingPrefix + clientID;
 
             var value = db.StringGet(key);
             if (value.IsNullOrEmpty)
             {
-                SetStartTraining(algorithm, clientID, false);
+                SetStartTraining(clientID, false);
                 return false;
             }
 
             return value == "true";
         }
 
-        public void SetStartTraining(AlgorithmName algorithm, string clientID, bool value)
+        public void SetStartTraining(string clientID, bool value)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _startTrainingPrefix + clientID + "_" +  algorithm;
+            var key = _startTrainingPrefix + clientID;
 
             if (value)
             {
@@ -56,26 +56,26 @@ namespace RestApi.Learning
             }
         }
 
-        public void InitializePushedClientsCounter(AlgorithmName algorithm, string clientID)
+        public void InitializePushedClientsCounter(string clientID)
         {
                 var db = _connectionMultiplexer.GetDatabase();
-                var key = _pushedClientsPrefix + clientID + "_" + algorithm;
+                var key = _pushedClientsPrefix + clientID;
 
                 db.StringSet(key, 0);
         }
         
-        public void SetLastTrainingTimestamp(AlgorithmName algorithm, string clientID, DateTime timestamp)
+        public void SetLastTrainingTimestamp(string clientID, DateTime timestamp)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _lastTrainingPrefix + clientID + "_" + algorithm;
+            var key = _lastTrainingPrefix + clientID;
 
             db.StringSet(key, timestamp.ToString());
         }
 
-        public DateTime GetLastTrainingTimestamp(AlgorithmName algorithm, string clientID)
+        public DateTime GetLastTrainingTimestamp(string clientID)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _lastTrainingPrefix + clientID + "_" + algorithm;
+            var key = _lastTrainingPrefix + clientID;
 
             var value = db.StringGet(key);
             if (value.IsNullOrEmpty)
@@ -86,18 +86,18 @@ namespace RestApi.Learning
             return DateTime.Parse(value);
         }
 
-        public void SetClientsThresholdToStartTraining(AlgorithmName algorithm, string clientID, int threshold)
+        public void SetClientsThresholdToStartTraining(string clientID, int threshold)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _clientsThresholdPrefix + clientID + "_" + algorithm;
+            var key = _clientsThresholdPrefix + clientID;
 
             db.StringSet(key, threshold);
         }
 
-        public int GetClientsThresholdToStartTraining(AlgorithmName algorithm, string clientID)
+        public int GetClientsThresholdToStartTraining(string clientID)
         {
             var db = _connectionMultiplexer.GetDatabase();
-            var key = _clientsThresholdPrefix + clientID + "_" + algorithm;
+            var key = _clientsThresholdPrefix + clientID;
 
             var value = db.StringGet(key);
             if (value.IsNullOrEmpty)

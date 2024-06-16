@@ -19,12 +19,12 @@ namespace RestApi.Firebase
             _storageHttpClient = httpClient;
         }
 
-        public async Task<bool> UploadClientModel(Stream model, AlgorithmName algorithmName, string fileName)
+        public async Task<bool> UploadClientModel(Stream model, string fileName)
         {
             string modelCloudPath;
             try
             {
-                modelCloudPath = await _db.Child(_clientModelsFolder).Child(algorithmName.ToString()).Child(fileName).PutAsync(model);
+                modelCloudPath = await _db.Child(_clientModelsFolder).Child(fileName).PutAsync(model);
             }
             catch (Exception e)
             {
@@ -36,18 +36,18 @@ namespace RestApi.Firebase
             return true;
         }
 
-        public async Task<string> PrintModel(AlgorithmName algorithmName, string fileName)
+        public async Task<string> PrintModel(string fileName)
         {
-            var content = await DownloadModel(algorithmName, fileName);
+            var content = await DownloadModel(fileName);
             Console.WriteLine("File contents:");
             Console.WriteLine(content);
 
             return content;
         }
 
-        public async Task<string> DownloadModel(AlgorithmName algorithmName, string fileName)
+        public async Task<string> DownloadModel(string fileName)
         {
-            var downloadUrl = await GetAggregatedModelFileUrl(algorithmName, fileName);
+            var downloadUrl = await GetAggregatedModelFileUrl(fileName);
             
             var response = await _storageHttpClient.GetAsync(downloadUrl);
             if (!response.IsSuccessStatusCode)
@@ -60,12 +60,12 @@ namespace RestApi.Firebase
             return content;
         }
         
-        public async Task<string?> GetAggregatedModelFileUrl(AlgorithmName algorithmName, string fileName)
+        public async Task<string?> GetAggregatedModelFileUrl(string fileName)
         {
             string? downloadUrl = null;
             try
             {
-                downloadUrl = await _db.Child(_aggregatedModelsFolder).Child(algorithmName.ToString()).Child(fileName).GetDownloadUrlAsync();
+                downloadUrl = await _db.Child(_aggregatedModelsFolder).Child(fileName).GetDownloadUrlAsync();
             }
             catch (Exception e)
             {
@@ -75,11 +75,11 @@ namespace RestApi.Firebase
             return downloadUrl;
         }
 
-        public async Task<bool> DeleteModel(AlgorithmName algorithmName, string fileName)
+        public async Task<bool> DeleteModel(string fileName)
         {
             try
             {
-                await _db.Child(_aggregatedModelsFolder).Child(algorithmName.ToString()).Child(fileName).DeleteAsync();
+                await _db.Child(_aggregatedModelsFolder).Child(fileName).DeleteAsync();
             }
             catch (Exception e)
             {
@@ -91,14 +91,14 @@ namespace RestApi.Firebase
             return true;
         }
 
-        public async Task<bool> CleanupClientModels(AlgorithmName algorithmName, string clientModelNamePrefix)
+        public async Task<bool> CleanupClientModels(string clientModelNamePrefix)
         {
             for (int i = 1; ; i++)
             {
                 var clientModelName = clientModelNamePrefix + i;
                 try
                 {
-                    await _db.Child(_clientModelsFolder).Child(algorithmName.ToString()).Child(clientModelName).DeleteAsync();
+                    await _db.Child(_clientModelsFolder).Child(clientModelName).DeleteAsync();
                     Console.WriteLine("Deleted model: " + clientModelName);
                 }
                 catch

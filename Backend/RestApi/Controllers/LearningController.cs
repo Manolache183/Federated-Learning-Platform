@@ -9,16 +9,9 @@ namespace RestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class MnistController : ControllerBase
+    public class LearningController(LearningManager learningManager) : ControllerBase
     {
-        private const AlgorithmName _algorithmName = AlgorithmName.mnist;
-        private readonly LearningManager _learningManager;
-
-        public MnistController(LearningManager learningManager)
-        {
-            _learningManager = learningManager;
-            _learningManager.AlgorithmName = _algorithmName;
-        }
+        private readonly LearningManager _learningManager = learningManager;
 
         // [Authorize(Roles = "client")]
         [HttpGet("checkIfTrainingShouldStart/{clientID}")]
@@ -46,7 +39,7 @@ namespace RestApi.Controllers
             return Ok(downloadUrl);
         }
 
-        // [Authorize(Roles = "client")]
+        [Authorize(Roles = "client")]
         [HttpPost("pushModel/{clientID}")]
         public async Task<IActionResult> PushModel([FromBody] List<ModelParameter> modelParameters, string clientID)
         {

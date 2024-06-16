@@ -14,7 +14,7 @@ class FirebaseStorageService:
 		self.bucket = storage.bucket()
 
 	def downloadClientModels(self, clientID) -> List[Tuple[int, List[bytes], float]]:
-		path = f"clientModels/mnist/{clientID}_client_mnist_model_"
+		path = f"clientModels/{clientID}_client_model_"
 		blobs = self.bucket.list_blobs(prefix=path)
 		parameters = []
 		for blob in blobs:
@@ -31,7 +31,7 @@ class FirebaseStorageService:
 		return parameters
 			
 	def uploadModel(self, model_name, parameters: List[bytes]):
-		model_path = f"aggregatedModels/mnist/{model_name}"
+		model_path = f"aggregatedModels/{model_name}"
 		blob = self.bucket.blob(model_path)
 
 		parameters_dict = {f"layer{i}": base64.b64encode(param).decode('utf-8') for i, param in enumerate(parameters)}
