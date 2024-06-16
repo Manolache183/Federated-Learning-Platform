@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RestApi.Common;
 using System.Text;
 
@@ -67,7 +67,7 @@ namespace RestApi.HttpClients
 
         public async Task<int> GetClientThreshold(string clientID)
         {
-            var url = $"/api/projects/{clientID}/threshold";
+            var url = $"/api/projects/{clientID}";
             var response = await _httpClient.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
@@ -75,7 +75,7 @@ namespace RestApi.HttpClients
                 var content = await response.Content.ReadAsStringAsync();
                 dynamic project = JsonConvert.DeserializeObject(content);
 
-                int threshold = project.threshold;
+                int threshold = project.minAvailableClients;
                 Console.WriteLine("Client threshold: " + threshold);
 
                 return threshold;
