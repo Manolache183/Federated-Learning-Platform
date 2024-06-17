@@ -46,8 +46,11 @@ namespace RestApi.Learning
                     return false;
                 }
 
-                _cacheService.SetLastTrainingTimestamp(clientID, DateTime.Now);
-                _cacheService.SetStartTraining(clientID, true);
+                if(!await StartTrainingAsync(clientID))
+                {
+                    Console.WriteLine("Failed to start training!");
+                    return false;
+                }
             }
             
             var r = await _loggerService.LogAsync("Training is about to start!");
@@ -122,6 +125,7 @@ namespace RestApi.Learning
             _eventBus.aggregationInProgress = false;
             _cacheService.SetStartTraining(clientID, true);
             _cacheService.InitializePushedClientsCounter(clientID);
+            _cacheService.SetLastTrainingTimestamp(clientID, DateTime.Now);
 
             var r = await _firebaseStorageService.CleanupClientModels(clientID + "_client_model_");
             if (!r)
